@@ -9,6 +9,16 @@ export function getPortalArticleCategories() {
   });
 }
 
+// 用户端：获取教程热门标签列表（含数量）
+export function getPortalArticleTags(limit = 50) {
+  return request({
+    url: "/portal/article/tags",
+    headers: { isToken: false },
+    method: "get",
+    params: { limit },
+  });
+}
+
 // 用户端：教程文章分页列表（仅已发布/正常）
 export function listPortalArticle(params) {
   return request({
@@ -27,4 +37,3 @@ export function getPortalArticleDetail(articleId) {
     method: "get",
   });
 }
-

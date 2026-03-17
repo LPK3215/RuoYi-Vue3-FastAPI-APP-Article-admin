@@ -12,6 +12,7 @@ from module_kb.entity.vo.portal_article_vo import (
     PortalArticleListItemModel,
     PortalArticlePageQueryModel,
 )
+from module_kb.entity.vo.portal_tag_vo import PortalTagItemModel
 from module_kb.service.portal_article_service import PortalArticleService
 from utils.log_util import logger
 from utils.response_util import ResponseUtil
@@ -36,6 +37,22 @@ async def get_portal_article_categories(
     categories = await PortalArticleService.get_category_list_services(query_db)
     logger.info('获取成功')
     return ResponseUtil.success(data=categories)
+
+
+@portal_article_controller.get(
+    '/tags',
+    summary='获取教程热门标签列表接口（用户端）',
+    description='用于获取用户端可用的热门标签（仅正常且未删除），并附带已发布文章数量',
+    response_model=DataResponseModel[list[PortalTagItemModel]],
+)
+async def get_portal_article_tags(
+    request: Request,
+    query_db: Annotated[AsyncSession, DBSessionDependency()],
+    limit: Annotated[int, Query(description='最多返回数量，默认50，最大200')] = 50,
+) -> Response:
+    tags = await PortalArticleService.get_tag_list_services(query_db, limit=limit)
+    logger.info('获取成功')
+    return ResponseUtil.success(data=tags)
 
 
 @portal_article_controller.get(

@@ -9,6 +9,12 @@ export type PortalArticleCategory = {
   articleCount: number
 }
 
+export type PortalArticleTag = {
+  tagId: number
+  tagName: string
+  articleCount: number
+}
+
 export type PortalArticleListItem = {
   articleId: number
   title: string
@@ -46,6 +52,15 @@ export async function getPortalArticleCategories() {
   return apiRequest<ApiResponse<PortalArticleCategory[]>>({
     url: '/portal/article/categories',
     method: 'get',
+    headers: { isToken: false },
+  })
+}
+
+export async function getPortalArticleTags(limit = 50) {
+  return apiRequest<ApiResponse<PortalArticleTag[]>>({
+    url: '/portal/article/tags',
+    method: 'get',
+    params: { limit },
     headers: { isToken: false },
   })
 }

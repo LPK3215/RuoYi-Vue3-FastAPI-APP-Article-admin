@@ -61,6 +61,49 @@ class PortalArticleDao:
         return CamelCaseUtil.transform_result([dict(row) for row in (rows or [])])
 
     @classmethod
+    async def get_tag_list(cls, db: AsyncSession, limit: int = 50) -> list[dict[str, Any]]:
+        """获取用户端教程标签列表（仅正常且未删除），并附带已发布文章数量。
+
+        仅返回“有已发布文章”的标签，避免用户端出现空标签。
+        """
+        safe_limit = int(limit or 0)
+        if safe_limit <= 0:
+            safe_limit = 50
+        if safe_limit > 200:
+            safe_limit = 200
+
+        query = (
+            select(
+                ToolKbTag.tag_id.label('tag_id'),
+                ToolKbTag.tag_name.label('tag_name'),
+                func.count(ToolKbArticle.article_id).label('article_count'),
+            )
+            .select_from(ToolKbTag)
+            .join(
+                ToolKbArticleTag,
+                ToolKbArticleTag.tag_id == ToolKbTag.tag_id,
+                isouter=True,
+            )
+            .join(
+                ToolKbArticle,
+                and_(
+                    ToolKbArticle.article_id == ToolKbArticleTag.article_id,
+                    ToolKbArticle.del_flag == '0',
+                    ToolKbArticle.status == '0',
+                    ToolKbArticle.publish_status == '1',
+                ),
+                isouter=True,
+            )
+            .where(ToolKbTag.del_flag == '0', ToolKbTag.status == '0')
+            .group_by(ToolKbTag.tag_id, ToolKbTag.tag_name, ToolKbTag.tag_sort)
+            .having(func.count(ToolKbArticle.article_id) > 0)
+            .order_by(func.count(ToolKbArticle.article_id).desc(), ToolKbTag.tag_sort, ToolKbTag.tag_id)
+            .limit(safe_limit)
+        )
+        rows = (await db.execute(query)).mappings().all()
+        return CamelCaseUtil.transform_result([dict(row) for row in (rows or [])])
+
+    @classmethod
     async def get_article_detail_by_id(cls, db: AsyncSession, article_id: int) -> ToolKbArticle | None:
         article = (
             (

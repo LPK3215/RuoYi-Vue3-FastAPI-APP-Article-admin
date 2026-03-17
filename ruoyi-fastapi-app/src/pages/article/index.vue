@@ -65,6 +65,23 @@
             搜索
           </view>
         </view>
+
+        <view v-if="hotTags.length" class="mt-3">
+          <scroll-view scroll-x class="whitespace-nowrap">
+            <view class="inline-flex items-center space-x-2">
+              <view
+                v-for="t in hotTags"
+                :key="t.tagId"
+                class="px-3 py-2 rounded-full text-xs border"
+                :class="tag.trim() === t.tagName ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-white text-gray-700 border-gray-200'"
+                @click="toggleHotTag(t.tagName)"
+              >
+                {{ t.tagName }}
+                <text class="ml-1 opacity-70">{{ t.articleCount }}</text>
+              </view>
+            </view>
+          </scroll-view>
+        </view>
       </view>
     </view>
 
@@ -197,7 +214,7 @@
 
 <script setup>
 import { computed, ref } from "vue";
-import { getPortalArticleCategories, listPortalArticle } from "@/api/article";
+ import { getPortalArticleCategories, getPortalArticleTags, listPortalArticle } from "@/api/article";
 import { useDict } from "@/utils/dict";
 
 const { kb_article_type } = useDict("kb_article_type");
@@ -205,6 +222,8 @@ const { kb_article_type } = useDict("kb_article_type");
 const keyword = ref("");
 const tag = ref("");
 const filterOpen = ref(false);
+
+const hotTags = ref([]);
 
 const categories = ref([]);
 const selectedCategoryId = ref("");
@@ -288,6 +307,28 @@ async function loadCategories() {
   categories.value = res.data || [];
 }
 
+async function loadHotTags() {
+  try {
+    const res = await getPortalArticleTags(30);
+    hotTags.value = (res.data || [])
+      .map((x) => ({
+        tagId: Number(x.tagId),
+        tagName: String(x.tagName || "").trim(),
+        articleCount: Number(x.articleCount || 0),
+      }))
+      .filter((x) => Number.isFinite(x.tagId) && x.tagId > 0 && x.tagName);
+  } catch (e) {
+    hotTags.value = [];
+  }
+}
+
+function toggleHotTag(name) {
+  const next = String(name || "").trim();
+  if (!next) return;
+  tag.value = tag.value.trim() === next ? "" : next;
+  handleSearch();
+}
+
 function buildQuery(nextPageNum) {
   const q = { pageNum: nextPageNum, pageSize: pageSize.value };
   if ((keyword.value || "").trim()) q.keyword = keyword.value.trim();
@@ -331,7 +372,7 @@ function loadMore() {
 
 onLoad(async () => {
   await loadCategories();
+  await loadHotTags();
   await fetchList(1, false);
 });
 </script>
-

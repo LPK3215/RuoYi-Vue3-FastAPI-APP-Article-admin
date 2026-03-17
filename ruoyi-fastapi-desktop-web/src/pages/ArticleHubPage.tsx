@@ -1,7 +1,9 @@
 import {
   getPortalArticleCategories,
+  getPortalArticleTags,
   listPortalArticle,
   type PortalArticleCategory,
+  type PortalArticleTag,
   type PortalArticleListItem,
   type PortalArticleListQuery,
 } from '@/api/portalArticle'
@@ -130,6 +132,26 @@ export function ArticleHubPage() {
     staleTime: 60_000,
   })
 
+  const tagQuery = useQuery({
+    queryKey: ['portalArticleTags'],
+    queryFn: async () => {
+      const res = await getPortalArticleTags(50)
+      return res.data || []
+    },
+    staleTime: 60_000,
+  })
+
+  const hotTags = useMemo(() => {
+    const list = (tagQuery.data || []) as PortalArticleTag[]
+    return list
+      .map((x) => ({
+        tagId: Number(x.tagId),
+        tagName: String(x.tagName || '').trim(),
+        articleCount: Number(x.articleCount || 0),
+      }))
+      .filter((x) => Number.isFinite(x.tagId) && x.tagId > 0 && x.tagName)
+  }, [tagQuery.data])
+
   const categories = useMemo(() => {
     const list = (categoryQuery.data?.data || []) as PortalArticleCategory[]
     return list
@@ -227,6 +249,34 @@ export function ArticleHubPage() {
                 ))}
               </Select>
             </div>
+
+            {hotTags.length ? (
+              <div className="ds-portalChips" aria-label="热门标签">
+                {hotTags.slice(0, 16).map((t) => {
+                  const active = appliedFilters.tag.trim() === t.tagName
+                  return (
+                    <Chip
+                      key={t.tagId}
+                      selected={active}
+                      tone={active ? 'accent' : 'muted'}
+                      size="sm"
+                      title={`${t.tagName}（${t.articleCount}）`}
+                      onClick={() => {
+                        const nextTag = active ? '' : t.tagName
+                        const nextFilters = { ...filters, tag: nextTag }
+                        setFilters(nextFilters)
+                        setAppliedFilters(nextFilters)
+                        setPageNum(1)
+                        syncUrl({ pageNum: 1, pageSize, filters: nextFilters })
+                      }}
+                    >
+                      {t.tagName}
+                      <span className="ds-chipCount">{t.articleCount}</span>
+                    </Chip>
+                  )
+                })}
+              </div>
+            ) : null}
 
             <div className="ds-portalSearchActions">
               <Button

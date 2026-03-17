@@ -1242,6 +1242,21 @@ a {
   gap: 10px;
 }
 
+.ds-portalChips {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+.ds-chipCount {
+  margin-left: 6px;
+  opacity: 0.8;
+  font-family: var(--mono);
+  font-size: 11px;
+}
+
 .ds-portalSearchActions {
   display: inline-flex;
   gap: 8px;

@@ -13,6 +13,7 @@ from module_kb.entity.vo.portal_article_vo import (
     PortalArticleListItemModel,
     PortalArticlePageQueryModel,
 )
+from module_kb.entity.vo.portal_tag_vo import PortalTagItemModel
 from module_software.entity.vo.portal_software_vo import PortalSoftwareListItemModel
 from utils.common_util import CamelCaseUtil
 
@@ -66,6 +67,13 @@ class PortalArticleService:
         if not rows:
             return []
         return [PortalArticleCategoryModel(**row) for row in rows]
+
+    @classmethod
+    async def get_tag_list_services(cls, query_db: AsyncSession, limit: int = 50) -> list[PortalTagItemModel]:
+        rows = await PortalArticleDao.get_tag_list(query_db, limit=limit)
+        if not rows:
+            return []
+        return [PortalTagItemModel(**row) for row in rows]
 
     @classmethod
     async def get_article_list_services(
