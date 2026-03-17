@@ -92,7 +92,25 @@
           <template #header>
             <div class="card-hd">
               <div class="card-title">附件</div>
-              <el-tag size="small" effect="plain" type="info">{{ attachmentsList.length }} 个</el-tag>
+              <div class="card-actions">
+                <el-tag size="small" effect="plain" type="info">{{ attachmentsList.length }} 个</el-tag>
+                <el-button
+                  text
+                  icon="DocumentCopy"
+                  :disabled="!attachmentsList.length"
+                  @click="copyAttachmentsMarkdown"
+                >
+                  复制Markdown
+                </el-button>
+                <el-button
+                  text
+                  icon="CopyDocument"
+                  :disabled="!attachmentsList.length"
+                  @click="copyAttachmentsLinks"
+                >
+                  复制链接
+                </el-button>
+              </div>
             </div>
           </template>
 
@@ -330,6 +348,44 @@ function openAttachment(item) {
   window.open(url, '_blank')
 }
 
+async function copyText(text) {
+  const t = String(text || '').trim()
+  if (!t) return
+  try {
+    await navigator.clipboard.writeText(t)
+    proxy.$modal.msgSuccess('已复制到剪贴板')
+  } catch (e) {
+    const textarea = document.createElement('textarea')
+    textarea.value = t
+    textarea.style.position = 'fixed'
+    textarea.style.left = '-9999px'
+    textarea.style.top = '-9999px'
+    document.body.appendChild(textarea)
+    textarea.focus()
+    textarea.select()
+    try {
+      document.execCommand('copy')
+      proxy.$modal.msgSuccess('已复制到剪贴板')
+    } catch (err) {
+      proxy.$modal.msgError('复制失败')
+    } finally {
+      document.body.removeChild(textarea)
+    }
+  }
+}
+
+function copyAttachmentsMarkdown() {
+  const list = attachmentsList.value || []
+  const md = list.map((a) => `- [${a.name}](${a.url})`).join('\n')
+  copyText(md)
+}
+
+function copyAttachmentsLinks() {
+  const list = attachmentsList.value || []
+  const text = list.map((a) => a.url).join('\n')
+  copyText(text)
+}
+
 function goList() {
   const fallbackTimer = window.setTimeout(() => {
     if (router.currentRoute.value?.path !== '/kb/article') {
@@ -492,6 +548,12 @@ watch(
   align-items: center;
   justify-content: space-between;
   gap: 10px;
+}
+
+.card-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .card-title {
