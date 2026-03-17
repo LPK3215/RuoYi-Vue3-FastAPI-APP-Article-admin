@@ -96,6 +96,15 @@
                 <el-tag size="small" effect="plain" type="info">{{ attachmentsList.length }} 个</el-tag>
                 <el-button
                   text
+                  icon="Check"
+                  :disabled="!attachmentsDirty"
+                  @click="saveAttachments"
+                  v-hasPermi="['tool:kb:article:edit']"
+                >
+                  保存更改
+                </el-button>
+                <el-button
+                  text
                   icon="DocumentCopy"
                   :disabled="!attachmentsList.length"
                   @click="copyAttachmentsMarkdown"
@@ -131,6 +140,48 @@
                 <el-link :href="scope.row.url" target="_blank" type="info" :underline="false">
                   {{ scope.row.url }}
                 </el-link>
+              </template>
+            </el-table-column>
+            <el-table-column label="管理" width="220" align="center" v-if="!loading">
+              <template #default="scope">
+                <el-button
+                  link
+                  type="primary"
+                  icon="ArrowUp"
+                  :disabled="scope.$index === 0"
+                  @click="moveAttachment(scope.$index, -1)"
+                  v-hasPermi="['tool:kb:article:edit']"
+                >
+                  上移
+                </el-button>
+                <el-button
+                  link
+                  type="primary"
+                  icon="ArrowDown"
+                  :disabled="scope.$index === attachmentsList.length - 1"
+                  @click="moveAttachment(scope.$index, 1)"
+                  v-hasPermi="['tool:kb:article:edit']"
+                >
+                  下移
+                </el-button>
+                <el-button
+                  link
+                  type="primary"
+                  icon="Edit"
+                  @click="renameAttachment(scope.$index)"
+                  v-hasPermi="['tool:kb:article:edit']"
+                >
+                  重命名
+                </el-button>
+                <el-button
+                  link
+                  type="danger"
+                  icon="Delete"
+                  @click="removeAttachment(scope.$index)"
+                  v-hasPermi="['tool:kb:article:edit']"
+                >
+                  删除
+                </el-button>
               </template>
             </el-table-column>
           </el-table>
@@ -199,6 +250,7 @@ import { MarkdownRender } from 'markstream-vue'
 import 'markstream-vue/index.css'
 
 import { getKbArticle } from '@/api/tool/kb/article'
+import { updateKbArticle } from '@/api/tool/kb/article'
 import { getSoftwareItem } from '@/api/tool/software/item'
 import { parseTime } from '@/utils/ruoyi'
 
@@ -265,6 +317,68 @@ const attachmentsList = computed(() => {
     return []
   }
 })
+
+const attachmentsDirty = ref(false)
+
+function setAttachmentsList(next) {
+  const cleaned = (next || [])
+    .map((x) => ({
+      name: String(x?.name || '').trim(),
+      url: String(x?.url || '').trim(),
+      size: x?.size
+    }))
+    .filter((x) => x.name && x.url)
+  detail.attachments = cleaned.length ? JSON.stringify(cleaned) : null
+  attachmentsDirty.value = true
+}
+
+function moveAttachment(index, delta) {
+  const list = attachmentsList.value.slice()
+  const nextIndex = index + delta
+  if (nextIndex < 0 || nextIndex >= list.length) return
+  const [item] = list.splice(index, 1)
+  list.splice(nextIndex, 0, item)
+  setAttachmentsList(list)
+}
+
+function removeAttachment(index) {
+  const list = attachmentsList.value.slice()
+  list.splice(index, 1)
+  setAttachmentsList(list)
+}
+
+function renameAttachment(index) {
+  const list = attachmentsList.value.slice()
+  const row = list[index]
+  if (!row) return
+  proxy.$modal
+    .prompt('请输入新的附件名称')
+    .then(({ value }) => {
+      const next = String(value || '').trim()
+      if (!next) return
+      row.name = next
+      setAttachmentsList(list)
+    })
+    .catch(() => {})
+}
+
+function saveAttachments() {
+  if (!attachmentsDirty.value) return
+  if (!detail.articleId) return
+  const payload = { articleId: detail.articleId, attachments: detail.attachments }
+  proxy.$modal.loading('正在保存附件...')
+  updateKbArticle(payload)
+    .then(() => {
+      attachmentsDirty.value = false
+      proxy.$modal.msgSuccess('附件已保存')
+    })
+    .catch(() => {
+      proxy.$modal.msgError('附件保存失败')
+    })
+    .finally(() => {
+      proxy.$modal.closeLoading()
+    })
+}
 
 const relatedSoftwares = computed(() => {
   const ids = Array.isArray(detail.softwareIds) ? detail.softwareIds : []
