@@ -1,3 +1,4 @@
+import json
 from datetime import datetime
 from typing import Any
 
@@ -18,6 +19,7 @@ from module_kb.service.kb_tag_service import ToolKbTagService
 from utils.common_util import CamelCaseUtil
 
 MAX_KB_TAGS_LENGTH = 500
+MAX_KB_ATTACHMENTS_LENGTH = 4000
 
 
 class ToolKbArticleService:
@@ -59,6 +61,44 @@ class ToolKbArticleService:
         tag_ids = [int(tag.tag_id) for tag in tags]
         tags_text = cls._normalize_tag_text([str(tag.tag_name) for tag in tags])
         return tag_ids, tag_list, tags_text
+
+    @classmethod
+    def _normalize_attachments(cls, raw: str | None) -> str | None:
+        """附件存储为 JSON 字符串；这里做基本清洗与长度限制。"""
+        text = (raw or '').strip()
+        if not text:
+            return None
+        # 允许前端直接传 /common/upload 返回的 fileName 列表，这里只接受 JSON list
+        try:
+            data = json.loads(text)
+        except Exception:
+            raise ServiceException(message='附件格式不合法（需为 JSON）')
+
+        if not isinstance(data, list):
+            raise ServiceException(message='附件格式不合法（需为数组）')
+
+        cleaned: list[dict[str, Any]] = []
+        for item in data:
+            if not isinstance(item, dict):
+                continue
+            name = str(item.get('name') or '').strip()
+            url = str(item.get('url') or '').strip()
+            if not name or not url:
+                continue
+            size = item.get('size')
+            try:
+                size_int = int(size) if size is not None else None
+            except Exception:
+                size_int = None
+            cleaned.append({'name': name[:200], 'url': url[:500], 'size': size_int})
+
+        if not cleaned:
+            return None
+
+        out = json.dumps(cleaned, ensure_ascii=False)
+        if len(out) > MAX_KB_ATTACHMENTS_LENGTH:
+            raise ServiceException(message=f'附件信息过长（最多 {MAX_KB_ATTACHMENTS_LENGTH} 字符）')
+        return out
 
     @classmethod
     async def _resolve_article_tags(
@@ -151,6 +191,8 @@ class ToolKbArticleService:
         payload['tagIds'] = [int(item.get('tagId')) for item in tag_list if item.get('tagId') is not None]
         payload['tagList'] = tag_list
         payload['tags'] = cls._normalize_tag_text([str(item.get('tagName') or '') for item in tag_list]) or article.tags
+        payload['attachments'] = getattr(article, 'attachments', None)
+        payload['articleType'] = getattr(article, 'article_type', None)
         return ToolKbArticleModel(**payload)
 
     @classmethod
@@ -164,6 +206,8 @@ class ToolKbArticleService:
                     raise ServiceException(message='分类不存在')
         tag_ids, _, tags_text = await cls._resolve_article_tags(query_db, article)
         article.tags = tags_text
+        if 'attachments' in article.model_fields_set:
+            article.attachments = cls._normalize_attachments(article.attachments)
         article.publish_status = article.publish_status or '0'
         article.status = article.status or '0'
         article.article_sort = int(article.article_sort or 0)
@@ -203,6 +247,8 @@ class ToolKbArticleService:
             exclude_unset=True,
             by_alias=False,
         )
+        if 'attachments' in payload:
+            payload['attachments'] = cls._normalize_attachments(payload.get('attachments'))
         should_update_tags = 'tags' in article.model_fields_set or 'tag_ids' in article.model_fields_set
         tag_ids: list[int] = []
         if should_update_tags:

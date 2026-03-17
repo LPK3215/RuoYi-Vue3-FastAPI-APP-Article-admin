@@ -15,13 +15,21 @@ export type PortalArticleListItem = {
   summary?: string | null
   coverUrl?: string | null
   tags?: string | null
+  articleType?: string | null
   publishTime?: string | null
   updateTime?: string | null
+}
+
+export type PortalAttachmentItem = {
+  name: string
+  url: string
+  size?: number | null
 }
 
 export type PortalArticleDetail = PortalArticleListItem & {
   contentMd?: string | null
   softwares: PortalSoftwareListItem[]
+  attachments?: PortalAttachmentItem[]
 }
 
 export type PortalArticleListQuery = {
@@ -30,6 +38,7 @@ export type PortalArticleListQuery = {
   keyword?: string
   categoryId?: number
   tag?: string
+  articleType?: string
   softwareId?: number
 }
 

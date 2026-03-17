@@ -121,6 +121,7 @@ class PortalArticleDao:
                 if keyword
                 else True,
                 ToolKbArticle.category_id == query_object.category_id if query_object.category_id else True,
+                ToolKbArticle.article_type == query_object.article_type if query_object.article_type else True,
                 tag_filter_clause,
             )
             .order_by(desc(ToolKbArticle.article_sort), desc(ToolKbArticle.publish_time), desc(ToolKbArticle.article_id))

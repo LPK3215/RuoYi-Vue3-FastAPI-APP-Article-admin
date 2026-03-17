@@ -1,223 +1,61 @@
 <template>
-  <view class="flex h-full flex-col bg-gray-50">
-    <!-- Header Area -->
-    <view class="bg-white pb-6 rounded-b-3xl shadow-sm z-50">
-      <!-- Title -->
-      <view class="pt-12 pb-4 px-4 flex justify-center items-center">
-        <text class="text-lg font-bold text-gray-800">RuoYi-FastAPI移动端</text>
-      </view>
+  <view class="flex h-full flex-col bg-[#0b0f14]">
+    <view class="px-4 pt-6">
+      <view class="relative overflow-hidden rounded-3xl bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-900 p-6 shadow-xl shadow-black/40">
+        <view class="absolute -right-14 -top-16 size-40 rounded-full bg-indigo-400/20 blur-2xl"></view>
+        <view class="absolute -left-10 -bottom-14 size-40 rounded-full bg-white/10 blur-2xl"></view>
 
-      <!-- Search & Notification -->
-      <view class="px-4 pb-2">
-        <view class="flex items-center space-x-3">
-          <!-- Search Input -->
-          <view class="flex-1 relative">
-            <view
-              class="absolute left-3 top-0 bottom-0 flex items-center text-gray-400"
-            >
-              <view class="i-mdi-magnify text-lg"></view>
+        <view class="relative z-10">
+          <view class="flex items-center justify-between">
+            <view>
+              <view class="text-[22px] font-bold text-white tracking-wide">DeskOps</view>
+              <view class="mt-1 text-xs text-white/70">软件库 · 教程 · 下载</view>
             </view>
-            <input
-              type="text"
-              placeholder="搜索..."
-              placeholder-class="text-gray-400"
-              class="w-full h-10 rounded-full bg-gray-100 pl-10 pr-4 text-sm text-gray-800"
-            />
+            <view class="flex items-center space-x-2">
+              <view class="px-3 py-1 rounded-full bg-white/10 text-white/80 text-[11px]">移动端</view>
+            </view>
           </view>
-          <!-- Notification -->
-          <view
-            class="relative flex h-10 w-10 items-center justify-center rounded-full bg-gray-50 text-gray-600 active:scale-95 transition-transform border border-gray-100"
-          >
-            <view class="i-mdi-bell-outline text-xl"></view>
-            <view
-              class="absolute top-2.5 right-2.5 h-2 w-2 rounded-full bg-red-500 border border-white"
-            ></view>
+
+          <view class="mt-5 grid grid-cols-2 gap-3">
+            <view class="rounded-2xl bg-white/10 border border-white/10 p-4 active:opacity-80" @click="goTab('/pages/software/index')">
+              <view class="flex items-center justify-between">
+                <view>
+                  <view class="text-white font-semibold">软件库</view>
+                  <view class="mt-1 text-white/60 text-xs">分类 · 标签 · 下载</view>
+                </view>
+                <view class="i-mdi-download-box-outline text-2xl text-white/90"></view>
+              </view>
+            </view>
+            <view class="rounded-2xl bg-white/10 border border-white/10 p-4 active:opacity-80" @click="goTab('/pages/article/index')">
+              <view class="flex items-center justify-between">
+                <view>
+                  <view class="text-white font-semibold">教程</view>
+                  <view class="mt-1 text-white/60 text-xs">类型 · 附件 · 关联软件</view>
+                </view>
+                <view class="i-mdi-book-open-page-variant text-2xl text-white/90"></view>
+              </view>
+            </view>
           </view>
+
+          <view class="mt-4 text-[11px] text-white/55">建议：把“软件/教程/我的”作为三大入口，其他系统管理留在后台。</view>
         </view>
       </view>
     </view>
 
-    <scroll-view
-      scroll-y
-      class="flex-1 overflow-hidden"
-      :show-scrollbar="false"
-    >
-      <view class="p-4 space-y-5 pb-24">
-        <!-- Hero Card -->
-        <view
-          class="relative overflow-hidden rounded-3xl bg-gradient-to-r from-indigo-500 to-purple-600 p-6 text-white shadow-xl shadow-indigo-200"
-        >
-          <view
-            class="absolute -right-10 -top-10 h-32 w-32 rounded-full bg-white/20 blur-2xl"
-          ></view>
-          <view
-            class="absolute -bottom-10 -left-10 h-32 w-32 rounded-full bg-white/20 blur-2xl"
-          ></view>
-
-          <view class="relative z-10">
-            <view class="mb-4 flex items-center justify-between">
-              <view
-                class="rounded-lg bg-white/20 px-3 py-1 text-xs font-medium backdrop-blur-sm"
-                >系统运行正常</view
-              >
-              <view class="text-xs opacity-80">刚刚更新</view>
-            </view>
-            <view class="flex items-end justify-between">
-              <view>
-                <view class="text-3xl font-bold">85%</view>
-                <view class="text-sm opacity-90">工作效率</view>
-              </view>
-              <view
-                class="h-10 w-24 overflow-hidden rounded-lg bg-white/10 p-1"
-              >
-                <view class="h-full w-full flex items-end justify-between px-1">
-                  <view class="w-1 bg-white/50 h-2 rounded-full"></view>
-                  <view class="w-1 bg-white/70 h-4 rounded-full"></view>
-                  <view class="w-1 bg-white/40 h-3 rounded-full"></view>
-                  <view class="w-1 bg-white/90 h-6 rounded-full"></view>
-                  <view class="w-1 bg-white/60 h-4 rounded-full"></view>
-                </view>
-              </view>
-            </view>
-          </view>
-        </view>
-
-        <!-- Stats Grid -->
-        <view class="grid grid-cols-2 gap-4">
-          <view
-            class="rounded-2xl bg-white p-4 shadow-sm border border-gray-100 flex items-center justify-between"
-          >
-            <view>
-              <view class="text-xs text-gray-500 mb-1">新通知</view>
-              <view class="text-2xl font-bold text-gray-800">12</view>
-            </view>
-            <view
-              class="flex h-12 w-12 items-center justify-center rounded-full bg-blue-50 text-blue-500"
-            >
-              <view class="i-mdi-bell text-xl"></view>
-            </view>
-          </view>
-          <view
-            class="rounded-2xl bg-white p-4 shadow-sm border border-gray-100 flex items-center justify-between"
-          >
-            <view>
-              <view class="text-xs text-gray-500 mb-1">待办任务</view>
-              <view class="text-2xl font-bold text-gray-800">5</view>
-            </view>
-            <view
-              class="flex h-12 w-12 items-center justify-center rounded-full bg-purple-50 text-purple-500"
-            >
-              <view class="i-mdi-calendar text-xl"></view>
-            </view>
-          </view>
-        </view>
-
-        <!-- Quick Functions -->
-        <view>
-          <view class="mb-4 flex items-center justify-between">
-            <view class="text-base font-bold text-gray-800">快捷入口</view>
-          </view>
-          <view
-            class="grid grid-cols-4 gap-2 rounded-2xl bg-white p-4 shadow-sm"
-          >
-            <view class="flex flex-col items-center space-y-2">
-              <view
-                class="flex h-12 w-12 items-center justify-center rounded-2xl bg-orange-50 text-orange-500"
-              >
-                <view class="i-mdi-file-document-edit text-xl"></view>
-              </view>
-              <view class="text-xs font-medium text-gray-600">申请</view>
-            </view>
-            <view
-              class="flex flex-col items-center space-y-2 active:opacity-60"
-              @click="handleToSoftware"
-            >
-              <view
-                class="flex h-12 w-12 items-center justify-center rounded-2xl bg-teal-50 text-teal-600"
-              >
-                <view class="i-mdi-download-box-outline text-xl"></view>
-              </view>
-              <view class="text-xs font-medium text-gray-600">软件库</view>
-            </view>
-            <view class="flex flex-col items-center space-y-2">
-              <view
-                class="flex h-12 w-12 items-center justify-center rounded-2xl bg-green-50 text-green-500"
-              >
-                <view class="i-mdi-newspaper text-xl"></view>
-              </view>
-              <view class="text-xs font-medium text-gray-600">新闻</view>
-            </view>
-            <view class="flex flex-col items-center space-y-2">
-              <view
-                class="flex h-12 w-12 items-center justify-center rounded-2xl bg-indigo-50 text-indigo-500"
-              >
-                <view class="i-mdi-chart-bar text-xl"></view>
-              </view>
-              <view class="text-xs font-medium text-gray-600">统计</view>
-            </view>
-            <view class="flex flex-col items-center space-y-2">
-              <view
-                class="flex h-12 w-12 items-center justify-center rounded-2xl bg-gray-50 text-gray-400"
-              >
-                <view class="i-mdi-calendar text-xl"></view>
-              </view>
-              <view class="text-xs font-medium text-gray-600">计划</view>
-            </view>
-          </view>
-        </view>
-
-        <!-- Recent Apps -->
-        <view>
-          <view class="mb-4 flex items-center justify-between">
-            <view class="text-base font-bold text-gray-800">最近更新</view>
-            <view class="text-xs text-blue-500">查看全部</view>
-          </view>
-          <view class="space-y-3">
-            <view
-              class="flex items-center rounded-2xl bg-white p-4 shadow-sm border border-gray-50"
-            >
-              <view
-                class="flex h-12 w-12 items-center justify-center rounded-xl bg-blue-50 text-blue-500"
-              >
-                <view class="i-mdi-clipboard-text-outline text-xl"></view>
-              </view>
-              <view class="ml-4 flex-1">
-                <view class="font-bold text-gray-800">请假申请</view>
-                <view class="text-xs text-gray-500">等待经理审批</view>
-              </view>
-              <view
-                class="rounded-full bg-yellow-50 px-3 py-1 text-xs font-medium text-yellow-600"
-                >待处理</view
-              >
-            </view>
-            <view
-              class="flex items-center rounded-2xl bg-white p-4 shadow-sm border border-gray-50"
-            >
-              <view
-                class="flex h-12 w-12 items-center justify-center rounded-xl bg-green-50 text-green-500"
-              >
-                <view class="i-mdi-newspaper text-xl"></view>
-              </view>
-              <view class="ml-4 flex-1">
-                <view class="font-bold text-gray-800">周报</view>
-                <view class="text-xs text-gray-500">提交成功</view>
-              </view>
-              <view
-                class="rounded-full bg-green-50 px-3 py-1 text-xs font-medium text-green-600"
-                >已完成</view
-              >
-            </view>
-          </view>
+    <view class="px-4 pt-4 pb-24">
+      <view class="rounded-2xl bg-white p-4">
+        <view class="text-sm font-bold text-gray-900">提示</view>
+        <view class="mt-2 text-xs text-gray-600 leading-5">
+          这个移动端只保留你日常真正会用到的功能：浏览软件、看教程、下载附件。管理/新增/导入等操作仍建议在后台完成。
         </view>
       </view>
-    </scroll-view>
+    </view>
   </view>
 </template>
 
 <script setup>
-const globalConfig = getApp().globalData.config;
-
-function handleToSoftware() {
-  uni.navigateTo({ url: "/pages/software/index" });
+function goTab(url) {
+  // tabBar 页面用 switchTab，避免返回栈混乱
+  uni.switchTab({ url })
 }
 </script>

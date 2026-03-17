@@ -103,6 +103,44 @@ prepare stmt3 from @kb_article_add_tags_sql;
 execute stmt3;
 deallocate prepare stmt3;
 
+-- 5.1) 文章表补字段：article_type
+set @kb_article_has_article_type := (
+  select count(1)
+  from information_schema.columns
+  where table_schema = database()
+    and table_name = 'tool_kb_article'
+    and column_name = 'article_type'
+);
+
+set @kb_article_add_article_type_sql := if(
+  @kb_article_has_article_type = 0,
+  "alter table tool_kb_article add column article_type varchar(32) default null comment '文章类型（字典 kb_article_type）' after content_md",
+  "select 1"
+);
+
+prepare stmt4 from @kb_article_add_article_type_sql;
+execute stmt4;
+deallocate prepare stmt4;
+
+-- 5.2) 文章表补字段：attachments
+set @kb_article_has_attachments := (
+  select count(1)
+  from information_schema.columns
+  where table_schema = database()
+    and table_name = 'tool_kb_article'
+    and column_name = 'attachments'
+);
+
+set @kb_article_add_attachments_sql := if(
+  @kb_article_has_attachments = 0,
+  "alter table tool_kb_article add column attachments varchar(4000) default null comment '附件（JSON字符串：[{name,url,size}]）' after tags",
+  "select 1"
+);
+
+prepare stmt5 from @kb_article_add_attachments_sql;
+execute stmt5;
+deallocate prepare stmt5;
+
 -- 6) 教程文章关联标签表
 create table if not exists tool_kb_article_tag (
   id                bigint(20)      not null auto_increment    comment '主键ID',
@@ -115,4 +153,3 @@ create table if not exists tool_kb_article_tag (
   index idx_kb_article_tag_article_id (article_id),
   index idx_kb_article_tag_tag_id (tag_id)
 ) engine=innodb comment = '教程文章关联标签表';
-

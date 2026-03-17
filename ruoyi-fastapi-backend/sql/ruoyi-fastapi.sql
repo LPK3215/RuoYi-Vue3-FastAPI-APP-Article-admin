@@ -481,6 +481,7 @@ insert into sys_dict_type values(9,  '通知状态', 	   'sys_notice_status',   
 insert into sys_dict_type values(10, '操作类型', 	   'sys_oper_type',       '0', 'admin', sysdate(), '', null, '操作类型列表');
 insert into sys_dict_type values(11, '系统状态',     'sys_common_status',   '0', 'admin', sysdate(), '', null, '登录状态列表');
 insert into sys_dict_type values(12, 'AI模型提供商', 'ai_provider_type',    '0', 'admin', sysdate(), '', null, 'AI模型提供商列表');
+insert into sys_dict_type values(13, '教程文章类型', 'kb_article_type',    '0', 'admin', sysdate(), '', null, '教程文章类型（教程/笔记/FAQ等）');
 
 
 -- ----------------------------
@@ -575,6 +576,11 @@ insert into sys_dict_data values(66, 34,  'Together',        'Together',        
 insert into sys_dict_data values(67, 35,  'Vercel',          'Vercel',           'ai_provider_type',    '',   'info',    'N', '0', 'admin', sysdate(), '', null, 'Vercel');
 insert into sys_dict_data values(68, 36,  'VLLM',            'VLLM',             'ai_provider_type',    '',   'info',    'N', '0', 'admin', sysdate(), '', null, 'VLLM');
 insert into sys_dict_data values(69, 37,  'xAI',             'xAI',              'ai_provider_type',    '',   'info',    'N', '0', 'admin', sysdate(), '', null, 'xAI');
+
+-- 教程文章类型（kb_article_type）
+insert into sys_dict_data values(70, 1,  '教程',      'tutorial',   'kb_article_type',    '',   'primary', 'Y', '0', 'admin', sysdate(), '', null, '教程文章');
+insert into sys_dict_data values(71, 2,  '笔记',      'note',       'kb_article_type',    '',   'info',    'N', '0', 'admin', sysdate(), '', null, '随手笔记');
+insert into sys_dict_data values(72, 3,  'FAQ',       'faq',        'kb_article_type',    '',   'warning', 'N', '0', 'admin', sysdate(), '', null, '常见问题');
 
 
 -- ----------------------------

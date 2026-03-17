@@ -43,6 +43,7 @@ class PortalArticleListItemModel(BaseModel):
     cover_url: str | None = Field(default=None, description='封面URL')
     tags: str | None = Field(default=None, description='标签（逗号分隔）')
     tag_list: list[PortalArticleTagItemModel] = Field(default_factory=list, description='标签列表')
+    article_type: str | None = Field(default=None, description='文章类型（字典 kb_article_type）')
     publish_time: datetime | None = Field(default=None, description='发布时间')
     update_time: datetime | None = Field(default=None, description='更新时间')
 
@@ -61,10 +62,13 @@ class PortalArticleDetailModel(BaseModel):
     content_md: str | None = Field(default=None, description='正文（Markdown）')
     tags: str | None = Field(default=None, description='标签（逗号分隔）')
     tag_list: list[PortalArticleTagItemModel] = Field(default_factory=list, description='标签列表')
+    article_type: str | None = Field(default=None, description='文章类型（字典 kb_article_type）')
     publish_time: datetime | None = Field(default=None, description='发布时间')
     update_time: datetime | None = Field(default=None, description='更新时间')
 
     softwares: list[PortalSoftwareListItemModel] = Field(default_factory=list, description='关联的软件列表（仅上架）')
+
+    attachments: list[dict[str, object]] = Field(default_factory=list, description='附件列表（简化：[{name,url,size}]）')
 
 
 class PortalArticlePageQueryModel(BaseModel):
@@ -80,4 +84,6 @@ class PortalArticlePageQueryModel(BaseModel):
     category_id: int | None = Field(default=None, description='分类ID')
     tag_id: int | None = Field(default=None, description='标签ID')
     tag: str | None = Field(default=None, description='标签（单个标签过滤）')
+    article_type: str | None = Field(default=None, description='文章类型（字典 kb_article_type）')
     software_id: int | None = Field(default=None, description='软件ID（查询关联教程）')
+

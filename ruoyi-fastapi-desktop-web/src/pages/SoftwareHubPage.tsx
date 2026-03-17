@@ -223,12 +223,12 @@ export function SoftwareHubPage() {
 
   return (
     <div className="ds-portalPad">
-      <section className="ds-portalHero" aria-label="SoftwareHub">
+      <section className="ds-portalHero" aria-label="软件库">
         <div className="ds-portalHeroText">
-          <div className="ds-portalEyebrow ds-mono">SOFTWAREHUB · PORTAL</div>
-          <h1 className="ds-portalTitle">一站式软件库，快速查找与下载</h1>
+          <div className="ds-portalEyebrow ds-mono">DESKOPS · SOFTWARE</div>
+          <h1 className="ds-portalTitle">软件库：快速查找、对比与下载</h1>
           <div className="ds-portalLead">
-            分类、标签、许可证、平台下载，一站式浏览。无需登录，打开就是软件库。
+            分类/标签/许可证/平台，一键定位常用工具；支持直达官网、仓库与多平台下载。
           </div>
 
           <div className="ds-portalSearch">
@@ -636,3 +636,5 @@ function SoftwareCard(props: { item: PortalSoftwareListItem; backTo: string }) {
     </Link>
   )
 }
+
+

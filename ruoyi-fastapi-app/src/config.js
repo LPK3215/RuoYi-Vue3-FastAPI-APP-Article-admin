@@ -4,22 +4,22 @@ export default {
   // 应用信息
   appInfo: {
     // 应用名称
-    name: "RuoYi-FastAPI-APP",
+    name: "DeskOps",
     // 应用版本
     version: "1.9.0",
     // 应用logo
     logo: "/static/logo.png",
     // 官方网站
-    site_url: "https://vfadmin.insistence.tech",
+    site_url: "",
     // 政策协议
     agreements: [
       {
         title: "隐私政策",
-        url: "https://ruoyi.vip/protocol.html",
+        url: "",
       },
       {
         title: "用户服务协议",
-        url: "https://ruoyi.vip/protocol.html",
+        url: "",
       },
     ],
   },

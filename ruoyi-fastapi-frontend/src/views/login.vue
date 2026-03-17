@@ -3,14 +3,14 @@
     <div class="auth-shell">
       <div class="auth-brand">
         <div class="auth-brand__mark">{{ title }}</div>
-        <div class="auth-brand__sub">SoftwareHub 管理控制台</div>
+        <div class="auth-brand__sub">软件库与教程管理后台</div>
         <div class="auth-brand__chips">
-          <el-tag effect="plain" size="large" class="chip">数据质量中心</el-tag>
-          <el-tag effect="plain" size="large" class="chip">批量治理</el-tag>
-          <el-tag effect="plain" size="large" class="chip">导入 / 导出</el-tag>
+          <el-tag effect="plain" size="large" class="chip">软件看板</el-tag>
+          <el-tag effect="plain" size="large" class="chip">批量管理</el-tag>
+          <el-tag effect="plain" size="large" class="chip">导入导出</el-tag>
         </div>
         <div class="auth-brand__hint">
-          更快地维护软件资源：缺项定位、快速修复、可审计的导入导出。
+          统一维护软件与教程内容：筛选、批量管理、导入导出与发布审核。
         </div>
       </div>
 
@@ -372,3 +372,4 @@ html.dark .login-form {
   padding-left: 12px;
 }
 </style>
+

@@ -43,6 +43,26 @@ class ToolSoftwareDao:
         return software
 
     @classmethod
+    async def get_software_detail_by_name(cls, db: AsyncSession, software_name: str) -> ToolSoftware | None:
+        """根据软件名称精确查询软件（排除软删）。"""
+        name = str(software_name or '').strip()
+        if not name:
+            return None
+        software = (
+            (
+                await db.execute(
+                    select(ToolSoftware).where(
+                        ToolSoftware.software_name == name,
+                        ToolSoftware.del_flag == '0',
+                    )
+                )
+            )
+            .scalars()
+            .first()
+        )
+        return software
+
+    @classmethod
     async def get_software_list(
         cls, db: AsyncSession, query_object: ToolSoftwarePageQueryModel, is_page: bool = False
     ) -> PageModel | list[list[dict[str, Any]]]:

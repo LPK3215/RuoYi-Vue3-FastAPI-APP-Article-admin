@@ -75,6 +75,7 @@ class ToolKbArticleDao:
                 if keyword
                 else True,
                 ToolKbArticle.category_id == query_object.category_id if query_object.category_id else True,
+                ToolKbArticle.article_type == query_object.article_type if query_object.article_type else True,
                 tag_filter_clause,
                 ToolKbArticle.publish_status == query_object.publish_status if query_object.publish_status else True,
                 ToolKbArticle.status == query_object.status if query_object.status else True,

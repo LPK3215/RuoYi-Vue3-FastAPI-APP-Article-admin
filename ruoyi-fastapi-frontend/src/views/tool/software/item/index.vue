@@ -150,6 +150,11 @@
         </el-button>
       </el-col>
       <el-col :span="1.5">
+        <el-button type="primary" plain icon="Monitor" @click="openLocalScan" v-hasPermi="['tool:software:item:edit']">
+          扫描本机
+        </el-button>
+      </el-col>
+      <el-col :span="1.5">
         <el-dropdown
           :disabled="multiple || viewMode !== 'table'"
           @command="handleBatchPublishCommand"
@@ -830,7 +835,7 @@
         <div class="drawer-header">
           <div class="drawer-title">
             <span>数据质量中心</span>
-            <el-tag effect="plain" type="info" size="small" class="drawer-tag">SoftwareHub</el-tag>
+            <el-tag effect="plain" type="info" size="small" class="drawer-tag">DeskOps</el-tag>
           </div>
           <el-button text icon="Refresh" :loading="qualityDrawer.loading" @click="loadQualityOverview">刷新</el-button>
         </div>
@@ -864,6 +869,57 @@
       </div>
     </el-drawer>
   </div>
+
+
+    <!-- 本机软件扫描导入 -->
+    <el-dialog title="本机软件扫描" v-model="localScan.open" width="920px" append-to-body>
+      <div class="local-scan-toolbar">
+        <el-input v-model="localScan.keyword" placeholder="搜索名称/发布者/版本" clearable style="width: 320px" @keyup.enter="runLocalScan" />
+        <el-button type="primary" icon="Search" :loading="localScan.loading" @click="runLocalScan">扫描</el-button>
+        <el-button icon="Refresh" :disabled="localScan.loading" @click="resetLocalScan">重置</el-button>
+        <div class="local-scan-right">
+          <el-select v-model="localScan.categoryId" placeholder="导入到分类" clearable filterable style="width: 220px">
+            <el-option v-for="c in categoryOptions" :key="c.categoryId" :label="c.categoryName" :value="c.categoryId" />
+          </el-select>
+          <el-checkbox v-model="localScan.updateSupport">同名更新</el-checkbox>
+          <el-checkbox v-model="localScan.overwrite">覆盖字段</el-checkbox>
+          <el-button type="success" icon="Plus" :disabled="!localScan.selectedIds.length" :loading="localScan.importing" @click="submitLocalImport">
+            导入选中（{{ localScan.selectedIds.length }}）
+          </el-button>
+        </div>
+      </div>
+
+      <el-alert
+        type="info"
+        show-icon
+        :closable="false"
+        title="说明"
+        description="从 Windows 注册表读取已安装软件，导入时按‘软件名称’匹配：同名存在则跳过或更新；默认导入到‘本机导入’分类。"
+        style="margin-bottom: 10px"
+      />
+
+      <el-table
+        v-loading="localScan.loading"
+        :data="localScan.rows"
+        height="520"
+        border
+        @selection-change="onLocalScanSelection"
+      >
+        <el-table-column type="selection" width="55" align="center" />
+        <el-table-column label="名称" prop="name" min-width="240" show-overflow-tooltip />
+        <el-table-column label="版本" prop="version" width="140" show-overflow-tooltip />
+        <el-table-column label="发布者" prop="publisher" min-width="180" show-overflow-tooltip />
+        <el-table-column label="安装路径" prop="installLocation" min-width="240" show-overflow-tooltip />
+        <el-table-column label="链接" prop="url" min-width="220" show-overflow-tooltip />
+      </el-table>
+
+      <template #footer>
+        <div class="dialog-footer">
+          <el-button @click="localScan.open=false">关 闭</el-button>
+        </div>
+      </template>
+    </el-dialog>
+
 </template>
 
 <script setup name="SoftwareItem">
@@ -884,6 +940,7 @@ import {
   listSoftwareItem,
   updateSoftwareItem
 } from '@/api/tool/software/item'
+import { scanLocalSoftware, importLocalSoftware } from '@/api/tool/software/scan'
 import { getSoftwareDashboardOverview } from '@/api/tool/software/dashboard'
 
 const { proxy } = getCurrentInstance()
@@ -970,6 +1027,70 @@ const upload = reactive({
   url: import.meta.env.VITE_APP_BASE_API + '/tool/software/item/importData'
 })
 
+
+
+const localScan = reactive({
+  open: false,
+  loading: false,
+  importing: false,
+  keyword: '',
+  rows: [],
+  selectedIds: [],
+  categoryId: undefined,
+  updateSupport: false,
+  overwrite: false
+})
+
+function openLocalScan() {
+  localScan.open = true
+  if (!localScan.rows.length) {
+    runLocalScan()
+  }
+}
+
+function resetLocalScan() {
+  localScan.keyword = ''
+  localScan.rows = []
+  localScan.selectedIds = []
+}
+
+function onLocalScanSelection(selection) {
+  localScan.selectedIds = (selection || []).map((x) => x.id)
+}
+
+function runLocalScan() {
+  localScan.loading = true
+  scanLocalSoftware({ keyword: localScan.keyword || undefined, limit: 1000 })
+    .then((res) => {
+      localScan.rows = res.data || []
+      localScan.selectedIds = []
+    })
+    .catch(() => {})
+    .finally(() => {
+      localScan.loading = false
+    })
+}
+
+function submitLocalImport() {
+  if (!localScan.selectedIds.length) return
+  localScan.importing = true
+  importLocalSoftware({
+    ids: localScan.selectedIds,
+    categoryId: localScan.categoryId,
+    updateSupport: Boolean(localScan.updateSupport),
+    overwrite: Boolean(localScan.overwrite)
+  })
+    .then((res) => {
+      const r = res.data || {}
+      proxy.$modal.msgSuccess(`导入完成：新增 ${r.created || 0}，更新 ${r.updated || 0}，跳过 ${r.skipped || 0}，失败 ${r.errors || 0}`)
+      localScan.open = false
+      getList()
+    })
+    .catch(() => {})
+    .finally(() => {
+      localScan.importing = false
+    })
+}
 const batchCategory = reactive({
   open: false,
   loading: false,
@@ -1829,4 +1950,25 @@ getList()
   max-height: 520px;
   overflow: auto;
 }
+
+
+.local-scan-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 10px;
+}
+
+.local-scan-right {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+
 </style>
+
+

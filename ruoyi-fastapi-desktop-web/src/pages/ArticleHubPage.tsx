@@ -21,6 +21,20 @@ type Filters = {
   keyword: string
   tag: string
   categoryId: string
+  articleType: string
+}
+
+const ARTICLE_TYPE_OPTIONS = [
+  { value: 'tutorial', label: '教程' },
+  { value: 'note', label: '笔记' },
+  { value: 'faq', label: 'FAQ' },
+] as const
+
+function articleTypeLabel(value: string | null | undefined) {
+  const v = (value || '').trim()
+  if (!v) return '教程'
+  const hit = ARTICLE_TYPE_OPTIONS.find((x) => x.value === v)
+  return hit?.label || '教程'
 }
 
 function isGarbled(text: string) {
@@ -58,6 +72,7 @@ function compactQuery(input: { pageNum: number; pageSize: number; filters: Filte
     if (Number.isFinite(n) && n > 0) q.categoryId = n
   }
   if (input.filters.tag.trim()) q.tag = input.filters.tag.trim()
+  if (input.filters.articleType.trim()) q.articleType = input.filters.articleType.trim()
   return q
 }
 
@@ -82,11 +97,12 @@ export function ArticleHubPage() {
     const keyword = p.get('q') || ''
     const tag = p.get('tag') || ''
     const categoryId = p.get('cat') || ''
+    const articleType = p.get('type') || ''
 
     return {
       pageNum: toInt('page', 1),
       pageSize: toInt('size', DEFAULT_PAGE_SIZE),
-      filters: { keyword, tag, categoryId } satisfies Filters,
+      filters: { keyword, tag, categoryId, articleType } satisfies Filters,
     }
   }, [])
 
@@ -102,6 +118,7 @@ export function ArticleHubPage() {
     if (next.filters.keyword.trim()) p.set('q', next.filters.keyword.trim())
     if (next.filters.categoryId.trim()) p.set('cat', next.filters.categoryId.trim())
     if (next.filters.tag.trim()) p.set('tag', next.filters.tag.trim())
+    if (next.filters.articleType.trim()) p.set('type', next.filters.articleType.trim())
 
     const search = p.toString() ? `?${p.toString()}` : ''
     navigate({ pathname: location.pathname, search }, { replace: true })
@@ -144,6 +161,7 @@ export function ArticleHubPage() {
     if (appliedFilters.keyword.trim()) c += 1
     if (appliedFilters.categoryId.trim()) c += 1
     if (appliedFilters.tag.trim()) c += 1
+    if (appliedFilters.articleType.trim()) c += 1
     return c
   }, [appliedFilters])
 
@@ -159,10 +177,10 @@ export function ArticleHubPage() {
     <div className="ds-portalPad">
       <section className="ds-portalHero" aria-label="教程/文章">
         <div className="ds-portalHeroText">
-          <div className="ds-portalEyebrow ds-mono">KNOWLEDGE BASE · PORTAL</div>
-          <h1 className="ds-portalTitle">教程与文章：经验沉淀，直达软件下载</h1>
+          <div className="ds-portalEyebrow ds-mono">DESKOPS · ARTICLES</div>
+          <h1 className="ds-portalTitle">教程：步骤清晰，关联软件一键直达</h1>
           <div className="ds-portalLead">
-            文章内容为 Markdown。文末关联的软件可一键跳转到软件详情与下载。无需登录即可阅读。
+            文章为 Markdown，支持分类与标签筛选；关联软件可直接跳到详情与下载。
           </div>
 
           <div className="ds-portalSearch">
@@ -196,6 +214,18 @@ export function ArticleHubPage() {
                 placeholder="单个标签（可选）"
                 autoComplete="off"
               />
+              <Select
+                label="类型"
+                value={filters.articleType}
+                onChange={(e) => setFilters((s) => ({ ...s, articleType: e.target.value }))}
+              >
+                <option value="">全部</option>
+                {ARTICLE_TYPE_OPTIONS.map((t) => (
+                  <option key={t.value} value={t.value}>
+                    {t.label}
+                  </option>
+                ))}
+              </Select>
             </div>
 
             <div className="ds-portalSearchActions">
@@ -212,7 +242,7 @@ export function ArticleHubPage() {
               <Button
                 variant="ghost"
                 onClick={() => {
-                  const empty: Filters = { keyword: '', tag: '', categoryId: '' }
+                  const empty: Filters = { keyword: '', tag: '', categoryId: '', articleType: '' }
                   setFilters(empty)
                   setAppliedFilters(empty)
                   setPageNum(1)
@@ -352,6 +382,7 @@ function ArticleCard(props: { item: PortalArticleListItem; backTo: string }) {
   const tags = splitTags(props.item.tags).slice(0, 4)
   const summary = (props.item.summary || '').trim() || '暂无摘要'
   const time = formatDate(props.item.publishTime || props.item.updateTime)
+  const typeLabel = articleTypeLabel(props.item.articleType)
 
   return (
     <Link to={`/article/${props.item.articleId}`} state={{ backTo: props.backTo }} className="ds-softCard" role="listitem">
@@ -378,7 +409,7 @@ function ArticleCard(props: { item: PortalArticleListItem; backTo: string }) {
         <div className="ds-softMeta">
           <div className="ds-softName">{title}</div>
           <div className="ds-softSub">
-            <span className="ds-pill ds-pill--neutral">教程</span>
+            <span className="ds-pill ds-pill--neutral">{typeLabel}</span>
             <span className="ds-softDot" aria-hidden="true" />
             <span className="ds-muted">
               发布于 <span className="ds-mono">{time}</span>
@@ -419,3 +450,4 @@ function ArticleCard(props: { item: PortalArticleListItem; backTo: string }) {
     </Link>
   )
 }
+

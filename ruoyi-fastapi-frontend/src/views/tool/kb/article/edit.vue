@@ -69,6 +69,11 @@
                 <el-option v-for="o in publishStatusOptions" :key="o.value" :label="o.label" :value="o.value" />
               </el-select>
             </el-form-item>
+            <el-form-item label="类型" prop="articleType">
+              <el-select v-model="form.articleType" placeholder="教程/笔记/FAQ" clearable filterable style="width: 100%">
+                <el-option v-for="d in kb_article_type" :key="d.value" :label="d.label" :value="d.value" />
+              </el-select>
+            </el-form-item>
             <el-form-item label="状态" prop="status">
               <el-radio-group v-model="form.status">
                 <el-radio v-for="dict in sys_normal_disable" :key="dict.value" :value="dict.value">
@@ -94,6 +99,17 @@
           >
             <el-option v-for="t in tagOptions" :key="t.tagId" :label="t.tagName" :value="t.tagName" />
           </el-select>
+        </el-form-item>
+
+        <el-divider content-position="left">附件</el-divider>
+        <el-form-item label="附件上传" prop="attachments">
+          <FileUpload
+            v-model="attachmentsValue"
+            :limit="10"
+            :fileSize="50"
+            :fileType="['zip','rar','7z','txt','md','pdf','doc','docx','xls','xlsx','ppt','pptx','png','jpg','jpeg','webp']"
+          />
+          <div class="hint">上传后会保存为附件列表，可在 Portal 文章详情页下载。</div>
         </el-form-item>
 
         <el-divider content-position="left">正文（Markdown）</el-divider>
@@ -128,6 +144,9 @@
         <el-row :gutter="12" class="software-picker">
           <el-col :span="18">
             <el-form-item label="添加软件">
+              <div class="software-actions">
+                <el-button plain icon="Filter" @click="softwareFilterDrawerOpen = true">筛选选择</el-button>
+              </div>
               <el-select
                 v-model="softwarePick"
                 filterable
@@ -216,6 +235,12 @@
             </template>
           </el-table-column>
         </el-table>
+
+        <SoftwareFilterDrawer
+          v-model="softwareFilterDrawerOpen"
+          @pick="onDrawerPickSoftware"
+          @view="onDrawerViewSoftware"
+        />
       </el-form>
     </el-card>
   </div>
@@ -231,14 +256,18 @@ import { listKbTagOptions } from '@/api/tool/kb/tag'
 import { getSoftwareItem, listSoftwareItem } from '@/api/tool/software/item'
 import { parseTime } from '@/utils/ruoyi'
 
+import SoftwareFilterDrawer from './components/SoftwareFilterDrawer.vue'
+
 const { proxy } = getCurrentInstance()
-const { sys_normal_disable } = proxy.useDict('sys_normal_disable')
+const { sys_normal_disable, kb_article_type } = proxy.useDict('sys_normal_disable', 'kb_article_type')
 
 const router = useRouter()
 const route = useRoute()
 
 const loading = ref(false)
 const saving = ref(false)
+
+const softwareFilterDrawerOpen = ref(false)
 
 const onlyPublishedSoftwares = ref(true)
 const softwarePick = ref()
@@ -262,7 +291,9 @@ function defaultForm() {
     summary: undefined,
     coverUrl: undefined,
     contentMd: undefined,
+    articleType: undefined,
     tags: undefined,
+    attachments: undefined,
     publishStatus: '0',
     publishTime: undefined,
     articleSort: 0,
@@ -311,6 +342,29 @@ const selectedSoftwareRows = computed(() => {
   })
 })
 
+
+
+const attachmentsValue = computed({
+  get: () => {
+    try {
+      const arr = JSON.parse(String(form.attachments || ''))
+      return Array.isArray(arr) ? arr : ''
+    } catch (e) {
+      return ''
+    }
+  },
+  set: (val) => {
+    if (!val) {
+      form.attachments = null
+      return
+    }
+    try {
+      form.attachments = JSON.stringify(val)
+    } catch (e) {
+      form.attachments = null
+    }
+  }
+})
 function splitTags(raw) {
   const s = String(raw || '')
     .replace(/，/g, ',')
@@ -461,6 +515,25 @@ function onPickSoftware(val) {
   softwarePick.value = undefined
 }
 
+function addSoftwareFromMeta(meta) {
+  const n = Number(meta?.softwareId)
+  if (!Number.isFinite(n) || n <= 0) return
+  if (!Array.isArray(form.softwareIds)) form.softwareIds = []
+  if (form.softwareIds.includes(n)) return
+  form.softwareIds.push(n)
+  softwareMeta.value = { ...softwareMeta.value, [String(n)]: meta }
+}
+
+function onDrawerPickSoftware(row) {
+  addSoftwareFromMeta(row)
+}
+
+function onDrawerViewSoftware(row) {
+  const softwareId = row?.softwareId
+  if (!softwareId) return
+  router.push({ path: '/software/detail', query: { softwareId } }).catch(() => {})
+}
+
 function moveSoftware(index, delta) {
   if (!Array.isArray(form.softwareIds)) return
   const nextIndex = index + delta
@@ -554,6 +627,8 @@ function submit(backToList) {
       summary: form.summary ?? null,
       coverUrl: form.coverUrl ?? null,
       contentMd: form.contentMd ?? null,
+      articleType: form.articleType ?? null,
+      attachments: form.attachments ?? null,
       tags: form.tags ?? '',
       publishStatus: form.publishStatus,
       articleSort: form.articleSort,
@@ -738,4 +813,10 @@ watch(
   gap: 8px;
   flex-wrap: wrap;
 }
-</style>
+.software-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 8px;
+}
+
+</style>\r\n

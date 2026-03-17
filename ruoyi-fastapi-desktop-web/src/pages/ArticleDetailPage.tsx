@@ -9,6 +9,19 @@ import clsx from 'clsx'
 import { useMemo } from 'react'
 import { Link, useLocation, useNavigate, useParams } from 'react-router-dom'
 
+const ARTICLE_TYPE_OPTIONS = [
+  { value: 'tutorial', label: '教程' },
+  { value: 'note', label: '笔记' },
+  { value: 'faq', label: 'FAQ' },
+] as const
+
+function articleTypeLabel(value: string | null | undefined) {
+  const v = (value || '').trim()
+  if (!v) return '教程'
+  const hit = ARTICLE_TYPE_OPTIONS.find((x) => x.value === v)
+  return hit?.label || '教程'
+}
+
 function isGarbled(text: string) {
   return /[\uD800-\uDFFF]/.test(text)
 }
@@ -43,6 +56,17 @@ function formatDateTime(iso: string | null | undefined) {
   return new Intl.DateTimeFormat('zh-CN', { dateStyle: 'medium', timeStyle: 'short' }).format(d)
 }
 
+function formatFileSize(size: number | null | undefined) {
+  if (size == null) return ''
+  if (!Number.isFinite(size) || size <= 0) return ''
+  const kb = size / 1024
+  if (kb < 1024) return `${kb.toFixed(kb < 10 ? 1 : 0)} KB`
+  const mb = kb / 1024
+  if (mb < 1024) return `${mb.toFixed(mb < 10 ? 1 : 0)} MB`
+  const gb = mb / 1024
+  return `${gb.toFixed(gb < 10 ? 1 : 0)} GB`
+}
+
 export function ArticleDetailPage() {
   const params = useParams()
   const navigate = useNavigate()
@@ -63,10 +87,16 @@ export function ArticleDetailPage() {
   const title = safeLabel(data?.title, `#${articleId}`)
   const summary = (data?.summary || '').trim()
   const cover = data?.coverUrl?.trim() || ''
+  const typeLabel = articleTypeLabel(data?.articleType)
 
   const softwares = useMemo(() => {
     const list = data?.softwares ? [...data.softwares] : []
     return list
+  }, [data])
+
+  const attachments = useMemo(() => {
+    const list = data?.attachments ? [...data.attachments] : []
+    return list.filter((x) => (x?.name || '').trim() && (x?.url || '').trim())
   }, [data])
 
   const currentBackTo = `${location.pathname}${location.search}`
@@ -123,7 +153,7 @@ export function ArticleDetailPage() {
                 <div className="ds-detailName">{title}</div>
                 <div className="ds-detailSub">{summary || '—'}</div>
                 <div className="ds-detailMeta">
-                  <span className="ds-pill ds-pill--neutral">教程</span>
+                  <span className="ds-pill ds-pill--neutral">{typeLabel}</span>
                   <span className="ds-muted">
                     发布时间 <span className="ds-mono">{formatDateTime(data.publishTime || data.updateTime)}</span>
                   </span>
@@ -192,6 +222,30 @@ export function ArticleDetailPage() {
                   )}
                 </div>
               </Card>
+
+              <Card>
+                <CardHeader title="附件" subtitle="点击打开/下载" />
+                <div className="ds-detailAsideBody">
+                  {attachments.length ? (
+                    <div className="ds-detailResources">
+                      {attachments.map((a) => (
+                        <a
+                          key={`${a.url}-${a.name}`}
+                          href={a.url}
+                          className={clsx('ds-detailResource')}
+                          target="_blank"
+                          rel="noreferrer"
+                        >
+                          <div className="ds-detailResourceTitle">{safeLabel(a.name, '附件')}</div>
+                          <div className="ds-detailResourceUrl ds-mono">{formatFileSize(a.size as number | null | undefined) || a.url}</div>
+                        </a>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="ds-muted">暂无附件</div>
+                  )}
+                </div>
+              </Card>
             </aside>
           </div>
         </>
@@ -199,4 +253,3 @@ export function ArticleDetailPage() {
     </div>
   )
 }
-

@@ -5,7 +5,7 @@ import { Input } from '@/ui/Input'
 import { Spinner } from '@/ui/Spinner'
 import { useMutation, useQuery } from '@tanstack/react-query'
 import { useEffect, useMemo, useState } from 'react'
-import { useLocation, useNavigate } from 'react-router-dom'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 
 const REMEMBER_KEY = 'deskops_remember_username'
 
@@ -83,8 +83,8 @@ export function LoginPage() {
     <div className="ds-login">
       <div className="ds-loginCard">
         <div className="ds-loginHeader">
-          <div className="ds-loginTitle">DeskOps</div>
-          <div className="ds-loginSubtitle">管理后台登录 · 仅限授权用户</div>
+          <Link to="/" className="ds-loginTitle ds-brandLink" aria-label="回到首页">DeskOps 管理</Link>
+          <div className="ds-loginSubtitle">管理后台登录 · 仅授权访问</div>
         </div>
 
         <div className="ds-loginForm">
@@ -200,3 +200,5 @@ export function LoginPage() {
     </div>
   )
 }
+
+

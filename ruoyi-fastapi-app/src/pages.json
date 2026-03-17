@@ -17,6 +17,22 @@
       }
     },
     {
+      "path": "pages/article/index",
+      "style": {
+        "navigationBarTitleText": "教程",
+        "navigationBarTextStyle": "white",
+        "navigationBarBackgroundColor": "#0b0f14"
+      }
+    },
+    {
+      "path": "pages/article/detail",
+      "style": {
+        "navigationBarTitleText": "教程详情",
+        "navigationBarTextStyle": "white",
+        "navigationBarBackgroundColor": "#0b0f14"
+      }
+    },
+    {
       "path": "pages/login",
       "style": {
         "navigationBarTitleText": "登录"
@@ -31,14 +47,8 @@
     {
       "path": "pages/index",
       "style": {
-        "navigationBarTitleText": "RuoYi-FastAPI移动端",
+        "navigationBarTitleText": "DeskOps",
         "navigationStyle": "custom"
-      }
-    },
-    {
-      "path": "pages/work/index",
-      "style": {
-        "navigationBarTitleText": "工作台"
       }
     },
     {
@@ -121,16 +131,16 @@
     "backgroundColor": "#ffffff",
     "list": [
       {
-        "pagePath": "pages/index",
+        "pagePath": "pages/software/index",
         "iconPath": "static/images/tabbar/home.png",
         "selectedIconPath": "static/images/tabbar/home_.png",
-        "text": "首页"
+        "text": "软件"
       },
       {
-        "pagePath": "pages/work/index",
+        "pagePath": "pages/article/index",
         "iconPath": "static/images/tabbar/work.png",
         "selectedIconPath": "static/images/tabbar/work_.png",
-        "text": "工作台"
+        "text": "教程"
       },
       {
         "pagePath": "pages/mine/index",
@@ -142,7 +152,7 @@
   },
   "globalStyle": {
     "navigationBarTextStyle": "black",
-    "navigationBarTitleText": "RuoYi",
+    "navigationBarTitleText": "DeskOps",
     "navigationBarBackgroundColor": "#FFFFFF"
   }
 }

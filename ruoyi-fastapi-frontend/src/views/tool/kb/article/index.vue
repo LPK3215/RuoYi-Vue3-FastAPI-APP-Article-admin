@@ -28,6 +28,11 @@
           <el-option v-for="t in tagOptions" :key="t.tagId" :label="t.tagName" :value="t.tagName" />
         </el-select>
       </el-form-item>
+      <el-form-item label="类型" prop="articleType">
+        <el-select v-model="queryParams.articleType" placeholder="全部" clearable filterable style="width: 180px">
+          <el-option v-for="d in kb_article_type" :key="d.value" :label="d.label" :value="d.value" />
+        </el-select>
+      </el-form-item>
       <el-form-item label="发布" prop="publishStatus">
         <el-select v-model="queryParams.publishStatus" placeholder="全部" clearable style="width: 160px">
           <el-option v-for="o in publishStatusOptions" :key="o.value" :label="o.label" :value="o.value" />
@@ -224,7 +229,7 @@ import { listKbTagOptions } from '@/api/tool/kb/tag'
 import { parseTime } from '@/utils/ruoyi'
 
 const { proxy } = getCurrentInstance()
-const { sys_normal_disable } = proxy.useDict('sys_normal_disable')
+const { sys_normal_disable, kb_article_type } = proxy.useDict('sys_normal_disable', 'kb_article_type')
 const router = useRouter()
 
 const showSearch = ref(true)
@@ -251,6 +256,7 @@ const queryParams = ref({
   keyword: undefined,
   categoryId: undefined,
   tag: undefined,
+  articleType: undefined,
   publishStatus: undefined,
   status: undefined
 })

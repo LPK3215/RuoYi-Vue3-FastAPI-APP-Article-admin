@@ -1,3 +1,4 @@
+import json
 from typing import Any
 
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -14,6 +15,19 @@ from module_kb.entity.vo.portal_article_vo import (
 )
 from module_software.entity.vo.portal_software_vo import PortalSoftwareListItemModel
 from utils.common_util import CamelCaseUtil
+
+
+def _safe_json_list(raw: str | None) -> list[dict[str, Any]]:
+    text = (raw or '').strip()
+    if not text:
+        return []
+    try:
+        data = json.loads(text)
+        if isinstance(data, list):
+            return [x for x in data if isinstance(x, dict)]
+        return []
+    except Exception:
+        return []
 
 
 class PortalArticleService:
@@ -97,4 +111,5 @@ class PortalArticleService:
         payload['tagList'] = tag_list
         payload['tags'] = cls._normalize_tag_text([str(item.get('tagName') or '') for item in tag_list]) or article.tags
         payload['softwares'] = softwares
+        payload['attachments'] = _safe_json_list(getattr(article, 'attachments', None))
         return PortalArticleDetailModel(**payload)

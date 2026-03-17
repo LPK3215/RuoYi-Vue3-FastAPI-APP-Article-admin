@@ -30,7 +30,7 @@
       </div>
     </section>
 
-    <el-row :gutter="16">
+  <el-row :gutter="16">
       <el-col :xs="24" :lg="16">
         <el-card shadow="never" class="content-card" v-loading="loading">
           <template #header>
@@ -67,6 +67,13 @@
               <span class="v">{{ detail.summary || '-' }}</span>
             </div>
             <div class="kv-item">
+              <span class="k">类型</span>
+              <span class="v">
+                <dict-tag v-if="detail.articleType" :options="kb_article_type" :value="detail.articleType" />
+                <span v-else>-</span>
+              </span>
+            </div>
+            <div class="kv-item">
               <span class="k">排序</span>
               <span class="v">{{ detail.articleSort ?? '-' }}</span>
             </div>
@@ -79,6 +86,38 @@
             </div>
             <div class="muted" v-else>暂无标签</div>
           </div>
+        </el-card>
+
+        <el-card shadow="never" class="table-card" v-loading="loading">
+          <template #header>
+            <div class="card-hd">
+              <div class="card-title">附件</div>
+              <el-tag size="small" effect="plain" type="info">{{ attachmentsList.length }} 个</el-tag>
+            </div>
+          </template>
+
+          <el-table v-if="attachmentsList.length" :data="attachmentsList" size="small" border>
+            <el-table-column label="#" width="56" align="center">
+              <template #default="scope">
+                {{ scope.$index + 1 }}
+              </template>
+            </el-table-column>
+            <el-table-column label="文件" min-width="220">
+              <template #default="scope">
+                <el-button link type="primary" @click="openAttachment(scope.row)">{{ scope.row.name }}</el-button>
+                <div class="muted" v-if="scope.row.size">{{ formatFileSize(scope.row.size) }}</div>
+              </template>
+            </el-table-column>
+            <el-table-column label="链接" min-width="240">
+              <template #default="scope">
+                <el-link :href="scope.row.url" target="_blank" type="info" :underline="false">
+                  {{ scope.row.url }}
+                </el-link>
+              </template>
+            </el-table-column>
+          </el-table>
+
+          <el-empty v-else-if="!loading" description="暂无附件" :image-size="68" />
         </el-card>
 
         <el-card shadow="never" class="table-card" v-loading="loading">
@@ -146,7 +185,7 @@ import { getSoftwareItem } from '@/api/tool/software/item'
 import { parseTime } from '@/utils/ruoyi'
 
 const { proxy } = getCurrentInstance()
-const { sys_normal_disable } = proxy.useDict('sys_normal_disable')
+const { sys_normal_disable, kb_article_type } = proxy.useDict('sys_normal_disable', 'kb_article_type')
 
 const router = useRouter()
 const route = useRoute()
@@ -160,6 +199,8 @@ const detail = reactive({
   coverUrl: undefined,
   contentMd: undefined,
   tags: undefined,
+  articleType: undefined,
+  attachments: undefined,
   publishStatus: '0',
   publishTime: undefined,
   articleSort: 0,
@@ -177,6 +218,35 @@ const articleId = computed(() => {
 })
 
 const tagList = computed(() => splitTags(detail.tags).slice(0, 48))
+
+const attachmentsList = computed(() => {
+  const raw = detail.attachments
+  if (!raw) return []
+  if (Array.isArray(raw)) {
+    return raw
+      .map((x) => ({
+        name: String(x?.name || '').trim(),
+        url: String(x?.url || '').trim(),
+        size: x?.size
+      }))
+      .filter((x) => x.name && x.url)
+  }
+  const text = String(raw || '').trim()
+  if (!text) return []
+  try {
+    const arr = JSON.parse(text)
+    if (!Array.isArray(arr)) return []
+    return arr
+      .map((x) => ({
+        name: String(x?.name || '').trim(),
+        url: String(x?.url || '').trim(),
+        size: x?.size
+      }))
+      .filter((x) => x.name && x.url)
+  } catch (e) {
+    return []
+  }
+})
 
 const relatedSoftwares = computed(() => {
   const ids = Array.isArray(detail.softwareIds) ? detail.softwareIds : []
@@ -241,6 +311,23 @@ function softwarePublishTagType(value) {
   if (value === '1') return 'success'
   if (value === '2') return 'warning'
   return 'info'
+}
+
+function formatFileSize(size) {
+  const n = Number(size)
+  if (!Number.isFinite(n) || n <= 0) return ''
+  const kb = n / 1024
+  if (kb < 1024) return `${kb.toFixed(kb < 10 ? 1 : 0)} KB`
+  const mb = kb / 1024
+  if (mb < 1024) return `${mb.toFixed(mb < 10 ? 1 : 0)} MB`
+  const gb = mb / 1024
+  return `${gb.toFixed(gb < 10 ? 1 : 0)} GB`
+}
+
+function openAttachment(item) {
+  const url = String(item?.url || '').trim()
+  if (!url) return
+  window.open(url, '_blank')
 }
 
 function goList() {

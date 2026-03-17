@@ -31,11 +31,23 @@ class ToolKbArticle(Base):
         comment='封面URL',
     )
     content_md = Column(Text, nullable=True, comment='正文（Markdown）')
+    article_type = Column(
+        String(32),
+        nullable=True,
+        server_default=SqlalchemyUtil.get_server_default_null(DataBaseConfig.db_type),
+        comment='文章类型（字典 kb_article_type）',
+    )
     tags = Column(
         String(500),
         nullable=True,
         server_default=SqlalchemyUtil.get_server_default_null(DataBaseConfig.db_type),
         comment='标签名称冗余缓存（逗号分隔）',
+    )
+    attachments = Column(
+        String(4000),
+        nullable=True,
+        server_default=SqlalchemyUtil.get_server_default_null(DataBaseConfig.db_type),
+        comment='附件（JSON字符串：[{name,url,size}]）',
     )
     publish_status = Column(CHAR(1), nullable=True, server_default='0', comment='发布状态（0草稿 1发布 2下线）')
     publish_time = Column(DateTime, nullable=True, comment='发布时间')

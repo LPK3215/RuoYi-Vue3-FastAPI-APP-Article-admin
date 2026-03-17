@@ -17,15 +17,15 @@ function SideItem(props: { to: string; label: string; hint?: string }) {
 export function Sidebar() {
   return (
     <aside className="ds-sidebar">
-      <div className="ds-brand">
+      <NavLink to="/admin/dashboard" className="ds-brand ds-brandLink" aria-label="回到管理首页">
         <div className="ds-brandMark" aria-hidden="true">
           <span />
         </div>
         <div className="ds-brandText">
           <div className="ds-brandTitle">{import.meta.env.VITE_APP_TITLE || 'DeskOps'}</div>
-          <div className="ds-brandSub">管理后台</div>
+          <div className="ds-brandSub">运营管理</div>
         </div>
-      </div>
+      </NavLink>
 
       <nav className="ds-nav">
         <div className="ds-navGroup">

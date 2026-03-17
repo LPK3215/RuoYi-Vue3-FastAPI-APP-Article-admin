@@ -1,3 +1,4 @@
+import json
 from datetime import datetime
 from typing import Literal
 
@@ -31,9 +32,11 @@ class ToolKbArticleModel(BaseModel):
     summary: str | None = Field(default=None, description='摘要')
     cover_url: str | None = Field(default=None, description='封面URL')
     content_md: str | None = Field(default=None, description='正文（Markdown）')
+    article_type: str | None = Field(default=None, description='文章类型（字典 kb_article_type）')
     tags: str | None = Field(default=None, description='标签名称（逗号分隔，兼容旧前端）')
     tag_ids: list[int] | None = Field(default=None, description='标签ID列表')
     tag_list: list[ToolKbArticleTagItemModel] | None = Field(default=None, description='标签列表')
+    attachments: str | None = Field(default=None, description='附件（JSON字符串：[{name,url,size}]）')
     publish_status: Literal['0', '1', '2'] | None = Field(default=None, description='发布状态（0草稿 1发布 2下线）')
     publish_time: datetime | None = Field(default=None, description='发布时间')
     article_sort: int | None = Field(default=None, description='显示顺序')
@@ -64,11 +67,33 @@ class ToolKbArticleModel(BaseModel):
     def get_tags(self) -> str | None:
         return self.tags
 
+    @Size(field_name='article_type', min_length=0, max_length=32, message='文章类型长度不能超过32个字符')
+    def get_article_type(self) -> str | None:
+        return self.article_type
+
+    @Size(field_name='attachments', min_length=0, max_length=4000, message='附件信息过长')
+    def get_attachments(self) -> str | None:
+        return self.attachments
+
+    def get_attachments_list(self) -> list[dict]:
+        raw = (self.attachments or '').strip()
+        if not raw:
+            return []
+        try:
+            data = json.loads(raw)
+            if isinstance(data, list):
+                return [x for x in data if isinstance(x, dict)]
+            return []
+        except Exception:
+            return []
+
     def validate_fields(self) -> None:
         self.get_title()
         self.get_summary()
         self.get_cover_url()
         self.get_tags()
+        self.get_article_type()
+        self.get_attachments()
 
 
 class ToolKbArticlePageQueryModel(BaseModel):
@@ -84,6 +109,7 @@ class ToolKbArticlePageQueryModel(BaseModel):
     category_id: int | None = Field(default=None, description='分类ID')
     tag_id: int | None = Field(default=None, description='标签ID')
     tag: str | None = Field(default=None, description='标签名称（单个标签过滤）')
+    article_type: str | None = Field(default=None, description='文章类型（字典 kb_article_type）')
     publish_status: Literal['0', '1', '2'] | None = Field(default=None, description='发布状态')
     status: Literal['0', '1'] | None = Field(default=None, description='状态（0正常 1停用）')
 
@@ -107,3 +133,4 @@ class ToolKbArticlePublishStatusModel(BaseModel):
 
     article_id: int = Field(description='文章ID')
     publish_status: Literal['0', '1', '2'] = Field(description='发布状态（0草稿 1发布 2下线）')
+

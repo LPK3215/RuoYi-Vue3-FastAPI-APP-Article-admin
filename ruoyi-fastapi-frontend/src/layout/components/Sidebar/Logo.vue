@@ -72,6 +72,10 @@ const getLogoTextColor = computed(() => {
   overflow: hidden;
 
   & .sidebar-logo-link {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 14px;
     height: 100%;
     width: 100%;
 
@@ -80,16 +84,19 @@ const getLogoTextColor = computed(() => {
       height: 32px;
       vertical-align: middle;
       margin-right: 12px;
+      filter: drop-shadow(0 10px 18px rgba(15, 23, 42, 0.18));
+      transform: translateZ(0);
     }
 
     & .sidebar-title {
       display: inline-block;
       margin: 0;
       color: v-bind(getLogoTextColor);
-      font-weight: 600;
+      font-weight: 780;
       line-height: 50px;
-      font-size: 14px;
-      font-family: Avenir, Helvetica Neue, Arial, Helvetica, sans-serif;
+      font-size: 15px;
+      letter-spacing: 0.2px;
+      font-family: var(--app-font-sans);
       vertical-align: middle;
     }
   }
@@ -101,3 +108,6 @@ const getLogoTextColor = computed(() => {
   }
 }
 </style>
+
+
+
