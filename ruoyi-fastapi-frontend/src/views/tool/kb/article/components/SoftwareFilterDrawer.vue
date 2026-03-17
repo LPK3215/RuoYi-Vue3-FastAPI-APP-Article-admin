@@ -32,11 +32,9 @@
       <el-form :model="query" label-width="86px" class="filter-form">
         <el-row :gutter="12">
           <el-col :span="24">
-            <el-form-item label="结果过滤">
-              <el-switch v-model="hideSelected" />
-              <span class="muted" style="margin-left: 10px">
-                默认隐藏已添加的软件（避免重复）
-              </span>
+            <el-form-item label="视图">
+              <el-segmented v-model="viewMode" :options="viewModeOptions" />
+              <span class="muted" style="margin-left: 10px">已添加 {{ selectedCount }} 个</span>
             </el-form-item>
           </el-col>
         </el-row>
@@ -178,6 +176,12 @@
 
       <el-divider content-position="left">结果</el-divider>
 
+      <div class="result-meta">
+        <span class="muted">命中 {{ total }} 个</span>
+        <span class="dot" aria-hidden="true">•</span>
+        <span class="muted">当前列表 {{ filteredRows.length }} 个</span>
+      </div>
+
       <el-table
         v-loading="loading"
         :data="filteredRows"
@@ -290,11 +294,23 @@ const query = reactive({
 const rows = ref([])
 const total = ref(0)
 const selectedRows = ref([])
-const hideSelected = ref(true)
+const viewMode = ref('unselected')
+
+const viewModeOptions = [
+  { label: '未添加', value: 'unselected' },
+  { label: '全部', value: 'all' },
+  { label: '已添加', value: 'selected' }
+]
+
+const selectedCount = computed(() => {
+  const ids = Array.isArray(props.selectedIds) ? props.selectedIds : []
+  return ids.map((x) => Number(x)).filter((x) => Number.isFinite(x) && x > 0).length
+})
 
 const filteredRows = computed(() => {
   const list = rows.value || []
-  if (!hideSelected.value) return list
+  if (viewMode.value === 'all') return list
+  if (viewMode.value === 'selected') return list.filter((x) => isSelected(x?.softwareId))
   return list.filter((x) => !isSelected(x?.softwareId))
 })
 
@@ -460,7 +476,7 @@ watch(
 )
 
 watch(
-  () => [hideSelected.value, props.selectedIds],
+  () => [viewMode.value, props.selectedIds],
   () => {
     selectedRows.value = []
   }
@@ -568,6 +584,13 @@ watch(
 
 .pager {
   margin-top: 10px;
+}
+
+.result-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 2px 10px;
 }
 </style>
 
