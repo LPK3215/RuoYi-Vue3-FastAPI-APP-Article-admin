@@ -184,12 +184,18 @@
 
         <el-row :gutter="12" class="software-picked-filter">
           <el-col :span="24">
-            <el-input
-              v-model="pickedSoftwareKeyword"
-              clearable
-              placeholder="在已添加的软件中搜索（名称/分类/ID）"
-              prefix-icon="Search"
-            />
+            <div class="picked-tools">
+              <el-input
+                v-model="pickedSoftwareKeyword"
+                clearable
+                placeholder="在已添加的软件中搜索（名称/分类/ID）"
+                prefix-icon="Search"
+              />
+              <el-button-group>
+                <el-button plain icon="Sort" @click="sortPickedSoftwares('updateTime')">按更新时间</el-button>
+                <el-button plain icon="Sort" @click="sortPickedSoftwares('name')">按名称</el-button>
+              </el-button-group>
+            </div>
           </el-col>
         </el-row>
 
@@ -574,6 +580,36 @@ function removeSoftware(index) {
   form.softwareIds.splice(index, 1)
 }
 
+function sortPickedSoftwares(mode) {
+  if (!Array.isArray(form.softwareIds) || !form.softwareIds.length) return
+  const ids = form.softwareIds.slice()
+  const meta = softwareMeta.value || {}
+
+  const getTime = (id) => {
+    const t = meta?.[String(id)]?.updateTime
+    const ms = t ? new Date(t).getTime() : 0
+    return Number.isFinite(ms) ? ms : 0
+  }
+  const getName = (id) => String(meta?.[String(id)]?.softwareName || '').toLowerCase()
+
+  ids.sort((a, b) => {
+    if (mode === 'name') {
+      const an = getName(a)
+      const bn = getName(b)
+      if (an < bn) return -1
+      if (an > bn) return 1
+      return a - b
+    }
+    // 默认：按更新时间倒序
+    const at = getTime(a)
+    const bt = getTime(b)
+    if (bt !== at) return bt - at
+    return b - a
+  })
+
+  form.softwareIds = ids
+}
+
 const ALLOWED_MD_EXTS = ['md', 'markdown', 'txt']
 const MAX_MARKDOWN_FILE_SIZE = 1024 * 1024
 const mdFileInputRef = ref()
@@ -837,6 +873,16 @@ watch(
   align-items: center;
   gap: 8px;
   flex-wrap: wrap;
+}
+
+.picked-tools {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.picked-tools :deep(.el-input) {
+  flex: 1;
 }
 .software-actions {
   display: flex;
