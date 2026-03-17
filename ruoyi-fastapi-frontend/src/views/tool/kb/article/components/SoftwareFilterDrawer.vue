@@ -13,6 +13,15 @@
           <el-tag effect="plain" type="info" size="small">筛选</el-tag>
         </div>
         <div class="drawer-actions">
+          <el-button
+            type="primary"
+            plain
+            icon="Plus"
+            :disabled="!selectedRows.length"
+            @click="emitPickSelected"
+          >
+            批量添加（{{ selectedRows.length }}）
+          </el-button>
           <el-button text icon="Refresh" :loading="loading" @click="reloadFacets">刷新筛选项</el-button>
           <el-button type="primary" icon="Search" :loading="loading" @click="handleQuery">查询</el-button>
         </div>
@@ -138,7 +147,16 @@
 
       <el-divider content-position="left">结果</el-divider>
 
-      <el-table v-loading="loading" :data="rows" size="small" border height="520">
+      <el-table
+        v-loading="loading"
+        :data="rows"
+        size="small"
+        border
+        height="520"
+        @selection-change="onSelectionChange"
+        row-key="softwareId"
+      >
+        <el-table-column type="selection" width="44" align="center" />
         <el-table-column label="软件" min-width="280">
           <template #default="scope">
             <div class="soft-cell">
@@ -235,6 +253,18 @@ const query = reactive({
 
 const rows = ref([])
 const total = ref(0)
+const selectedRows = ref([])
+
+let queryTimer = 0
+
+function queueQuery() {
+  if (!open.value) return
+  if (queryTimer) window.clearTimeout(queryTimer)
+  queryTimer = window.setTimeout(() => {
+    query.pageNum = 1
+    handleQuery()
+  }, 260)
+}
 
 function publishLabel(value) {
   if (value === '1') return '上架'
@@ -268,6 +298,18 @@ function buildRequestParams() {
     hasTags: quality.hasTags ? '1' : undefined
   }
   return params
+}
+
+function onSelectionChange(list) {
+  selectedRows.value = Array.isArray(list) ? list : []
+}
+
+function emitPickSelected() {
+  const list = selectedRows.value || []
+  for (const row of list) {
+    emit('pick', row)
+  }
+  selectedRows.value = []
 }
 
 async function reloadFacets() {
@@ -315,6 +357,7 @@ function resetQuery() {
 
 function handleQuery() {
   loading.value = true
+  selectedRows.value = []
   listSoftwareItem(buildRequestParams())
     .then((res) => {
       rows.value = res?.rows || []
@@ -339,10 +382,31 @@ watch(
 )
 
 watch(
+  () => [query.keyword, query.categoryId, query.tag, query.license, query.author, query.team, query.platform, query.openSource, query.publishStatus],
+  () => {
+    queueQuery()
+  }
+)
+
+watch(
+  () => [quality.hasIcon, quality.hasLicense, quality.hasOfficialUrl, quality.hasDownloads, quality.hasTags, onlyPublished.value],
+  () => {
+    queueQuery()
+  }
+)
+
+watch(
   () => onlyPublished.value,
   () => {
     query.pageNum = 1
     if (open.value) handleQuery()
+  }
+)
+
+watch(
+  () => open.value,
+  (v) => {
+    if (!v) selectedRows.value = []
   }
 )
 </script>
