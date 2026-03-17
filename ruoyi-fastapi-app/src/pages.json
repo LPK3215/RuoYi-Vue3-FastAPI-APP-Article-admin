@@ -138,8 +138,8 @@
       },
       {
         "pagePath": "pages/article/index",
-        "iconPath": "static/images/tabbar/work.png",
-        "selectedIconPath": "static/images/tabbar/work_.png",
+        "iconPath": "static/images/tabbar/article.png",
+        "selectedIconPath": "static/images/tabbar/article_.png",
         "text": "教程"
       },
       {
