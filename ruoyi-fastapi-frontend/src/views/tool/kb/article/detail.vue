@@ -142,6 +142,16 @@
                 </el-link>
               </template>
             </el-table-column>
+            <el-table-column label="复制" width="180" align="center">
+              <template #default="scope">
+                <el-button link type="primary" icon="DocumentCopy" @click="copyAttachmentMarkdown(scope.row)">
+                  复制Markdown
+                </el-button>
+                <el-button link type="primary" icon="CopyDocument" @click="copyAttachmentLink(scope.row)">
+                  复制链接
+                </el-button>
+              </template>
+            </el-table-column>
             <el-table-column label="管理" width="220" align="center" v-if="!loading">
               <template #default="scope">
                 <el-button
@@ -498,6 +508,19 @@ function copyAttachmentsLinks() {
   const list = attachmentsList.value || []
   const text = list.map((a) => a.url).join('\n')
   copyText(text)
+}
+
+function copyAttachmentMarkdown(item) {
+  const name = String(item?.name || '').trim()
+  const url = String(item?.url || '').trim()
+  if (!name || !url) return
+  copyText(`- [${name}](${url})`)
+}
+
+function copyAttachmentLink(item) {
+  const url = String(item?.url || '').trim()
+  if (!url) return
+  copyText(url)
 }
 
 function goList() {
