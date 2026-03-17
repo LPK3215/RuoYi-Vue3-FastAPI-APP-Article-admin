@@ -33,6 +33,7 @@
           <span class="el-icon-document"> {{ getFileName(file.name) }} </span>
         </el-link>
         <div class="ele-upload-list__item-content-action">
+          <el-link :underline="false" @click="handleRename(index)" type="primary" v-if="!disabled">重命名</el-link>
           <el-link :underline="false" @click="handleDelete(index)" type="danger" v-if="!disabled">删除</el-link>
         </div>
       </li>
@@ -46,6 +47,11 @@ import Sortable from 'sortablejs';
 
 const props = defineProps({
   modelValue: [String, Object, Array],
+  // 输出模式：string(逗号拼接url) / array(对象数组)
+  output: {
+    type: String,
+    default: 'string'
+  },
   // 上传接口地址
   action: {
     type: String,
@@ -103,7 +109,7 @@ watch(() => props.modelValue, val => {
   if (val) {
     let temp = 1;
     // 首先将值转为数组
-    const list = Array.isArray(val) ? val : props.modelValue.split(',');
+    const list = Array.isArray(val) ? val : String(props.modelValue || '').split(',');
     // 然后将数组转为对象数组
     fileList.value = list.map(item => {
       if (typeof item === "string") {
@@ -117,6 +123,17 @@ watch(() => props.modelValue, val => {
     return [];
   }
 },{ deep: true, immediate: true });
+
+function buildOutputValue() {
+  if (props.output === 'array') {
+    return (fileList.value || []).map((f) => ({
+      name: f.name,
+      url: f.url,
+      size: f.size ?? null
+    }))
+  }
+  return listToString(fileList.value)
+}
 
 // 上传前校检格式和大小
 function handleBeforeUpload(file) {
@@ -162,7 +179,11 @@ function handleUploadError(err) {
 // 上传成功回调
 function handleUploadSuccess(res, file) {
   if (res.code === 200) {
-    uploadList.value.push({ name: res.fileName, url: res.fileName });
+    uploadList.value.push({
+      name: res.originalFilename || res.newFileName || res.fileName,
+      url: res.fileName,
+      size: file?.size
+    });
     uploadedSuccessfully();
   } else {
     number.value--;
@@ -176,7 +197,21 @@ function handleUploadSuccess(res, file) {
 // 删除文件
 function handleDelete(index) {
   fileList.value.splice(index, 1);
-  emit("update:modelValue", listToString(fileList.value));
+  emit("update:modelValue", buildOutputValue());
+}
+
+function handleRename(index) {
+  const row = fileList.value?.[index]
+  if (!row) return
+  proxy.$modal
+    .prompt('请输入新的附件名称')
+    .then(({ value }) => {
+      const next = String(value || '').trim()
+      if (!next) return
+      row.name = next
+      emit('update:modelValue', buildOutputValue())
+    })
+    .catch(() => {})
 }
 
 // 上传结束处理
@@ -185,7 +220,7 @@ function uploadedSuccessfully() {
     fileList.value = fileList.value.filter(f => f.url !== undefined).concat(uploadList.value);
     uploadList.value = [];
     number.value = 0;
-    emit("update:modelValue", listToString(fileList.value));
+    emit("update:modelValue", buildOutputValue());
     proxy.$modal.closeLoading();
   }
 }

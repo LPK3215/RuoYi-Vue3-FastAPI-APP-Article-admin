@@ -104,7 +104,8 @@
         <el-divider content-position="left">附件</el-divider>
         <el-form-item label="附件上传" prop="attachments">
           <FileUpload
-            v-model="attachmentsValue"
+            v-model="attachmentsList"
+            output="array"
             :limit="10"
             :fileSize="50"
             :fileType="['zip','rar','7z','txt','md','pdf','doc','docx','xls','xlsx','ppt','pptx','png','jpg','jpeg','webp']"
@@ -362,27 +363,25 @@ const selectedSoftwareRows = computed(() => {
   })
 })
 
-
-
-const attachmentsValue = computed({
+const attachmentsList = computed({
   get: () => {
     try {
       const arr = JSON.parse(String(form.attachments || ''))
-      return Array.isArray(arr) ? arr : ''
+      return Array.isArray(arr) ? arr : []
     } catch (e) {
-      return ''
+      return []
     }
   },
   set: (val) => {
-    if (!val) {
-      form.attachments = null
-      return
-    }
-    try {
-      form.attachments = JSON.stringify(val)
-    } catch (e) {
-      form.attachments = null
-    }
+    const list = Array.isArray(val) ? val : []
+    const cleaned = list
+      .map((x) => ({
+        name: String(x?.name || '').trim(),
+        url: String(x?.url || '').trim(),
+        size: x?.size
+      }))
+      .filter((x) => x.name && x.url)
+    form.attachments = cleaned.length ? JSON.stringify(cleaned) : null
   }
 })
 
