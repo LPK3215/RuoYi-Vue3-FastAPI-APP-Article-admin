@@ -31,6 +31,17 @@
     <div class="drawer-body">
       <el-form :model="query" label-width="86px" class="filter-form">
         <el-row :gutter="12">
+          <el-col :span="24">
+            <el-form-item label="结果过滤">
+              <el-switch v-model="hideSelected" />
+              <span class="muted" style="margin-left: 10px">
+                默认隐藏已添加的软件（避免重复）
+              </span>
+            </el-form-item>
+          </el-col>
+        </el-row>
+
+        <el-row :gutter="12">
           <el-col :span="12">
             <el-form-item label="关键词">
               <el-input
@@ -169,7 +180,7 @@
 
       <el-table
         v-loading="loading"
-        :data="rows"
+        :data="filteredRows"
         size="small"
         border
         height="520"
@@ -279,6 +290,13 @@ const query = reactive({
 const rows = ref([])
 const total = ref(0)
 const selectedRows = ref([])
+const hideSelected = ref(true)
+
+const filteredRows = computed(() => {
+  const list = rows.value || []
+  if (!hideSelected.value) return list
+  return list.filter((x) => !isSelected(x?.softwareId))
+})
 
 let queryTimer = 0
 
@@ -438,6 +456,13 @@ watch(
   () => [quality.hasIcon, quality.hasLicense, quality.hasOfficialUrl, quality.hasDownloads, quality.hasTags, onlyPublished.value],
   () => {
     queueQuery()
+  }
+)
+
+watch(
+  () => [hideSelected.value, props.selectedIds],
+  () => {
+    selectedRows.value = []
   }
 )
 

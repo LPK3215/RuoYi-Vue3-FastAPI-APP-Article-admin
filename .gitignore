@@ -118,6 +118,9 @@ dmypy.json
 # Pyre type checker
 .pyre/
 
+# Local temp patches
+tmp_*.txt
+
 # pytype static type analyzer
 .pytype/
 
