@@ -1,109 +1,328 @@
-# SoftwareHub 后端（ruoyi-fastapi-backend）部署文档
+# ruoyi-fastapi-backend（部署说明）
 
-本目录为 **FastAPI 后端服务**，同时提供：
+本文件聚焦后端部署，覆盖：
 
-- 后台管理 API（管理端登录后使用）
-- Portal API（用户端/公开展示使用）
+- 本机部署
+- 生产部署
+- Docker 部署
+- 环境切换
+- 反向代理
 
-> 更完整的本机开发说明见：`ruoyi-fastapi-backend/README.md`。本文件侧重“部署与环境配置”。
+更详细的开发说明见：[README.md](./README.md)
 
 ---
 
-## 环境要求
+## 1. 部署前检查清单
+
+### 依赖
 
 - Python 3.10+
-- MySQL 5.7+（或 PostgreSQL 13+）
-- Redis 6.0+
+- Redis 6+
+- MySQL 5.7+ / MariaDB 或 PostgreSQL 13+
+
+### 必做项
+
+1. 准备数据库
+2. 准备 Redis
+3. 准备对应的 `.env.*`
+4. 初始化 SQL
+5. 启动后端
+6. 配置 Nginx 或其他反向代理
 
 ---
 
-## 环境文件与配置
+## 2. 环境文件选择
 
-后端会按 `APP_ENV` 加载对应的 `.env.*` 文件：
+后端统一按下面优先级加载环境：
 
-- 默认：`.env.dev`
-- 生产：`.env.prod`
-- Docker（MySQL / PG）：`.env.dockermy` / `.env.dockerpg`
+1. `--env`
+2. `APP_ENV`
+3. 默认 `dev`
 
-关键配置（示例）：
+并且 `.env.<env>` 缺失时会直接报错退出，避免“明明改了 A，实际却跑了 B”。
+
+### 内置环境
+
+| 环境 | 配置文件 | 说明 |
+|------|----------|------|
+| `dev` | `.env.dev` | 本机开发 |
+| `prod` | `.env.prod` | 正式环境 / 本机模拟生产 |
+| `dockermy` | `.env.dockermy` | Docker + MySQL |
+| `dockerpg` | `.env.dockerpg` | Docker + PostgreSQL |
+
+### 自定义环境
+
+如果要部署预发布环境，建议新增：
+
+- `.env.stage`
+
+并至少调整：
 
 ```ini
-APP_ENV = 'prod'
-APP_HOST = '0.0.0.0'
-APP_PORT = 9099
+APP_ENV = 'stage'
+APP_ROOT_PATH = '/stage-api'
 APP_RELOAD = false
-APP_ROOT_PATH = '/prod-api'
-
-DB_TYPE = 'mysql'
-DB_HOST = '127.0.0.1'
-DB_PORT = 3306
-DB_USERNAME = 'root'
-DB_PASSWORD = 'root'
-DB_DATABASE = 'ruoyi-fastapi'
-
-REDIS_HOST = '127.0.0.1'
-REDIS_PORT = 6379
-REDIS_PASSWORD = ''
-REDIS_DATABASE = 2
+APP_DISABLE_SWAGGER = true
+APP_DISABLE_REDOC = true
 ```
 
----
-
-## 初始化数据库（首次部署必须）
-
-本项目的菜单/权限/字典/种子数据依赖 SQL 初始化，首次部署请执行：
-
-1. 基础表/权限/字典：`sql/ruoyi-fastapi.sql`
-2. 软件库业务表 + 菜单：`sql/ruoyi-fastapi-software.sql`
-3. 教程/知识库（文章 + 关联软件 + 菜单）：`sql/ruoyi-fastapi-kb.sql`
-
-> 如果是“已有库升级”，且只想同步软件菜单顺序/授权，可执行：`sql/ruoyi-fastapi-software-menu-migrate.sql`。
-
-> 如果是“已有库升级”，且教程菜单仍挂在「软件管理」下，可执行：`sql/ruoyi-fastapi-kb-menu-migrate.sql`。
-
-> 如果是“已有库升级”，且缺少教程分类表或 `tool_kb_article.category_id`，可执行：`sql/ruoyi-fastapi-kb-db-migrate.sql`。
-
----
-
-## 启动方式
-
-推荐先用统一入口（支持 `--env`）跑通：
+启动：
 
 ```bash
-cd ruoyi-fastapi-backend
-python app.py --env prod
+python app.py --env stage
 ```
 
-如果使用 `uvicorn`（需要通过环境变量指定环境）：
+---
 
-- Windows PowerShell：
+## 3. 数据库初始化
+
+### MySQL / MariaDB
+
+首次部署执行：
+
+1. `sql/ruoyi-fastapi.sql`
+2. `sql/ruoyi-fastapi-software.sql`
+3. `sql/ruoyi-fastapi-kb.sql`
+
+### PostgreSQL
+
+首次部署执行：
+
+1. `sql/ruoyi-fastapi-pg.sql`
+
+### 增量迁移
+
+按需执行：
+
+- `sql/ruoyi-fastapi-software-menu-migrate.sql`
+- `sql/ruoyi-fastapi-kb-menu-migrate.sql`
+- `sql/ruoyi-fastapi-kb-db-migrate.sql`
+- `sql/ruoyi-fastapi-kb-category-migrate.sql`
+
+---
+
+## 4. 本机部署
+
+### 推荐原则
+
+- 日常本机使用，固定优先走 `.env.dev`
+- 本地把验证码、文档、接口、管理端链路全部确认正常后，再切到 `prod` 或部署环境
+- 不建议把“日常开发启动”和“部署启动”混在一起
+- 本地默认建议开启验证码；如果只是为了临时调试才关闭，请显式执行 `sql/ruoyi-fastapi-dev-disable-captcha.sql`
+- 需要恢复时执行 `sql/ruoyi-fastapi-dev-enable-captcha.sql`
+
+### MySQL / MariaDB
+
+```powershell
+cd ruoyi-fastapi-backend
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
+pip install -r requirements.txt
+.\run.bat
+```
+
+仓库根目录也可以直接：
+
+```powershell
+.\2-backend-start.bat
+```
+
+### PostgreSQL
+
+```powershell
+cd ruoyi-fastapi-backend
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
+pip install -r requirements-pg.txt
+.\run.bat pgprod
+```
+
+说明：
+
+- `pgprod` 只是示例名，对应你自己准备的 `.env.pgprod`
+- 只要文件名和 `--env` 一致即可
+
+---
+
+### 本机模拟生产
+
+只有在你明确要验证生产配置时，再运行：
+
+```powershell
+cd ruoyi-fastapi-backend
+.\run.bat prod
+```
+
+## 5. 使用 uvicorn / 多 worker
+
+如果你希望自己控制 worker 数量，使用：
+
+- Windows PowerShell
 
 ```powershell
 $env:APP_ENV="prod"
 uvicorn server:create_app --factory --host 0.0.0.0 --port 9099 --workers 2
 ```
 
-- macOS/Linux：
+- Linux / macOS
 
 ```bash
 export APP_ENV=prod
 uvicorn server:create_app --factory --host 0.0.0.0 --port 9099 --workers 2
 ```
 
----
+注意：
 
-## 与前端的路径约定（反向代理）
-
-典型部署建议：
-
-- 管理端静态资源：`/`（来自 `ruoyi-fastapi-frontend/dist`）
-- API：`/prod-api/` 代理到后端 `9099`，并去掉 `/prod-api` 前缀再转发
-
-Nginx 示例见：`ruoyi-fastapi-backend/README.md`。
+- `uvicorn` 模式下不再使用 `--env`
+- `APP_ENV` 必须提前设置
 
 ---
 
-## 验证部署
+## 6. Docker 部署
 
-- API：`http://127.0.0.1:9099`
-- Swagger：`http://127.0.0.1:9099/docs`（可通过 `.env.prod` 关闭）
+### MySQL 版本
+
+仓库根目录执行：
+
+```bash
+docker compose -f docker-compose.my.yml up -d --build
+```
+
+端口：
+
+- 管理后台：`12580`
+- 后端：`19099`
+- MySQL：`13306`
+- Redis：`16379`
+
+### PostgreSQL 版本
+
+```bash
+docker compose -f docker-compose.pg.yml up -d --build
+```
+
+端口：
+
+- 管理后台：`12580`
+- 后端：`19099`
+- PostgreSQL：`15432`
+- Redis：`16379`
+
+### Windows 辅助脚本
+
+MySQL Docker 方案可以直接用：
+
+```powershell
+.\scripts\dev\start-dockermy-and-check.ps1
+```
+
+它会自动：
+
+1. 启动 compose
+2. 等待 MySQL / Redis 健康
+3. 补执行软件库和 KB SQL
+4. 校验 Portal 接口
+
+说明：
+
+- Docker 场景本质上仍然是同一个后端入口，只是换成 `.env.dockermy` / `.env.dockerpg`
+- 本机开发没问题后，再切到 Docker / 生产环境，排障会简单很多
+
+---
+
+## 7. Nginx 反向代理
+
+### 生产环境 `/prod-api`
+
+```nginx
+server {
+  listen 80;
+  server_name your-domain.com;
+
+  location /prod-api/ {
+    proxy_pass http://127.0.0.1:9099/;
+    proxy_set_header Host $host;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto $scheme;
+  }
+}
+```
+
+### 预发布 `/stage-api`
+
+```nginx
+server {
+  listen 80;
+  server_name stage.your-domain.com;
+
+  location /stage-api/ {
+    proxy_pass http://127.0.0.1:9099/;
+    proxy_set_header Host $host;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto $scheme;
+  }
+}
+```
+
+### Docker `/docker-api`
+
+项目里现成配置在：
+
+- `ruoyi-fastapi-frontend/bin/nginx.dockermy.conf`
+- `ruoyi-fastapi-frontend/bin/nginx.dockerpg.conf`
+
+---
+
+## 8. 与前端配套关系
+
+| 场景 | 后端前缀 | 管理后台 | Portal Web |
+|------|----------|----------|------------|
+| 本机开发 | `/dev-api` | `npm run dev` | `.env.development` |
+| 预发布 | `/stage-api` | `npm run build:stage` | 自定义 mode |
+| 生产 | `/prod-api` | `npm run build:prod` | `.env.production` |
+| Docker | `/docker-api` | `npm run build:docker` | 通常不单独部署 |
+
+部署时最容易出错的地方，就是前端 API 前缀和后端 `APP_ROOT_PATH` 不一致。
+
+---
+
+## 9. 部署后验证
+
+建议至少验证以下内容：
+
+1. 后端进程是否正常启动
+2. `http://host:9099/docs` 是否可访问（如果未禁用 Swagger）
+3. 登录接口是否返回正常
+4. 后台前端能否登录
+5. Portal 接口如 `/portal/article/list` 是否正常
+
+---
+
+## 10. 常见部署问题
+
+### Swagger 访问不了
+
+检查 `.env.prod`：
+
+- `APP_DISABLE_SWAGGER`
+- `APP_DISABLE_REDOC`
+
+### 前端 404 / 502
+
+优先检查：
+
+- 前端请求前缀是否和 `APP_ROOT_PATH` 一致
+- Nginx 的 `proxy_pass` 是否以 `/` 结尾
+- 后端端口是否真的在监听 `9099`
+
+### 数据库连不上
+
+检查：
+
+- `DB_TYPE`
+- `DB_HOST`
+- `DB_PORT`
+- 是否导入了正确 SQL
+- PostgreSQL 场景是否安装了 `requirements-pg.txt`

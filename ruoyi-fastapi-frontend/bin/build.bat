@@ -1,12 +1,10 @@
 @echo off
 echo.
-echo [信息] 打包Web工程，生成dist文件。
+echo [INFO] Building admin web app...
 echo.
 
-%~d0
-cd %~dp0
-
+cd /d "%~dp0"
 cd ..
-yarn build:prod
+npm run build:prod
 
 pause

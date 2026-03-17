@@ -8,6 +8,12 @@ from dotenv import load_dotenv
 from pydantic import computed_field
 from pydantic_settings import BaseSettings
 
+BACKEND_BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+
+def resolve_backend_path(*parts: str) -> str:
+    return os.path.join(BACKEND_BASE_DIR, *parts)
+
 
 class AppSettings(BaseSettings):
     """
@@ -118,7 +124,7 @@ class GenSettings:
     table_prefix = 'sys_'
     allow_overwrite = False
 
-    GEN_PATH = 'vf_admin/gen_path'
+    GEN_PATH = resolve_backend_path('vf_admin', 'gen_path')
 
     def __init__(self) -> None:
         if not os.path.exists(self.GEN_PATH):
@@ -131,7 +137,7 @@ class UploadSettings:
     """
 
     UPLOAD_PREFIX = '/profile'
-    UPLOAD_PATH = 'vf_admin/upload_path'
+    UPLOAD_PATH = resolve_backend_path('vf_admin', 'upload_path')
     UPLOAD_MACHINE = 'A'
     DEFAULT_ALLOWED_EXTENSION = [
         # 图片
@@ -162,7 +168,7 @@ class UploadSettings:
         # pdf
         'pdf',
     ]
-    DOWNLOAD_PATH = 'vf_admin/download_path'
+    DOWNLOAD_PATH = resolve_backend_path('vf_admin', 'download_path')
 
     def __init__(self) -> None:
         if not os.path.exists(self.UPLOAD_PATH):
@@ -176,7 +182,7 @@ class CachePathConfig:
     缓存目录配置
     """
 
-    PATH = os.path.join(os.path.abspath(os.getcwd()), 'caches')
+    PATH = resolve_backend_path('caches')
     PATHSTR = 'caches'
 
 
@@ -244,7 +250,7 @@ class GetConfig:
         # 检查是否在alembic环境中运行，如果是则跳过参数解析
         if 'alembic' in sys.argv[0] or any('alembic' in arg for arg in sys.argv):
             ini_config = configparser.ConfigParser()
-            ini_config.read('alembic.ini', encoding='utf-8')
+            ini_config.read(resolve_backend_path('alembic.ini'), encoding='utf-8')
             if 'settings' in ini_config:
                 # 获取env选项
                 env_value = ini_config['settings'].get('env')
@@ -253,24 +259,25 @@ class GetConfig:
             # 使用uvicorn启动时，命令行参数需要按照uvicorn的文档进行配置，无法自定义参数
             pass
         else:
+            current_env = str(os.environ.get('APP_ENV', '') or '').strip()
             # 使用argparse定义命令行参数
             parser = argparse.ArgumentParser(description='命令行参数')
-            parser.add_argument('--env', type=str, default='', help='运行环境')
+            parser.add_argument('--env', type=str, default=current_env, help='运行环境')
             # 解析命令行参数
             args = parser.parse_args()
-            # 设置环境变量，如果未设置命令行参数，默认APP_ENV为dev
-            os.environ['APP_ENV'] = args.env if args.env else 'dev'
+            # 优先级：显式 --env > 已设置的 APP_ENV > dev
+            resolved_env = str(args.env or current_env or 'dev').strip() or 'dev'
+            os.environ['APP_ENV'] = resolved_env
         # 读取运行环境
-        run_env = os.environ.get('APP_ENV', '')
-        # 运行环境未指定时默认加载.env.dev
-        env_file = '.env.dev'
-        # 运行环境不为空时按命令行参数加载对应.env文件
-        if run_env != '':
-            env_file = f'.env.{run_env}'
-        # 加载配置（使用绝对路径，避免因工作目录变化导致读取不到.env文件）
-        base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-        env_path = os.path.join(base_dir, env_file)
-        load_dotenv(env_path)
+        run_env = str(os.environ.get('APP_ENV', '') or '').strip() or 'dev'
+        env_file = f'.env.{run_env}'
+        env_path = resolve_backend_path(env_file)
+        if not os.path.exists(env_path):
+            raise FileNotFoundError(f'未找到环境配置文件：{env_path}')
+        os.environ['APP_ENV'] = run_env
+        os.environ['APP_ENV_FILE'] = env_path
+        # 显式覆盖环境变量，避免旧系统环境把当前环境配置污染掉
+        load_dotenv(env_path, override=True)
 
 
 # 实例化获取配置类

@@ -6,6 +6,17 @@ from pydantic.alias_generators import to_camel
 from module_software.entity.vo.portal_software_vo import PortalSoftwareListItemModel
 
 
+class PortalArticleTagItemModel(BaseModel):
+    """
+    用户端：教程标签项模型
+    """
+
+    model_config = ConfigDict(alias_generator=to_camel, from_attributes=True)
+
+    tag_id: int = Field(description='标签ID')
+    tag_name: str = Field(description='标签名称')
+
+
 class PortalArticleCategoryModel(BaseModel):
     """
     用户端：教程分类展示模型
@@ -31,6 +42,7 @@ class PortalArticleListItemModel(BaseModel):
     summary: str | None = Field(default=None, description='摘要')
     cover_url: str | None = Field(default=None, description='封面URL')
     tags: str | None = Field(default=None, description='标签（逗号分隔）')
+    tag_list: list[PortalArticleTagItemModel] = Field(default_factory=list, description='标签列表')
     publish_time: datetime | None = Field(default=None, description='发布时间')
     update_time: datetime | None = Field(default=None, description='更新时间')
 
@@ -48,6 +60,7 @@ class PortalArticleDetailModel(BaseModel):
     cover_url: str | None = Field(default=None, description='封面URL')
     content_md: str | None = Field(default=None, description='正文（Markdown）')
     tags: str | None = Field(default=None, description='标签（逗号分隔）')
+    tag_list: list[PortalArticleTagItemModel] = Field(default_factory=list, description='标签列表')
     publish_time: datetime | None = Field(default=None, description='发布时间')
     update_time: datetime | None = Field(default=None, description='更新时间')
 
@@ -65,5 +78,6 @@ class PortalArticlePageQueryModel(BaseModel):
     page_size: int = Field(default=10, description='每页记录数')
     keyword: str | None = Field(default=None, description='关键字（标题/摘要）')
     category_id: int | None = Field(default=None, description='分类ID')
+    tag_id: int | None = Field(default=None, description='标签ID')
     tag: str | None = Field(default=None, description='标签（单个标签过滤）')
     software_id: int | None = Field(default=None, description='软件ID（查询关联教程）')

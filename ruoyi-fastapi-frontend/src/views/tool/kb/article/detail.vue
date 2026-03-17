@@ -244,11 +244,27 @@ function softwarePublishTagType(value) {
 }
 
 function goList() {
-  router.push({ path: '/kb/article' }).catch(() => {
-    try {
-      router.back()
-    } catch (e) {}
-  })
+  const fallbackTimer = window.setTimeout(() => {
+    if (router.currentRoute.value?.path !== '/kb/article') {
+      window.location.assign('/kb/article')
+    }
+  }, 320)
+
+  Promise.resolve(router.push({ path: '/kb/article' }))
+    .then(() => {
+      if (router.currentRoute.value?.path === '/kb/article') {
+        window.clearTimeout(fallbackTimer)
+        return
+      }
+      try {
+        router.back()
+      } catch (e) {}
+    })
+    .catch(() => {
+      try {
+        router.back()
+      } catch (e) {}
+    })
 }
 
 function goEdit() {
@@ -485,4 +501,3 @@ watch(
   gap: 6px;
 }
 </style>
-

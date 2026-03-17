@@ -1,0 +1,293 @@
+{
+  "created_at": "20260317_141036",
+  "database": "ruoyi-fastapi",
+  "tables": {
+    "tool_kb_article": {
+      "exists": true,
+      "create_sql": "CREATE TABLE `tool_kb_article` (\n  `article_id` bigint NOT NULL AUTO_INCREMENT COMMENT '文章ID',\n  `title` varchar(200) COLLATE utf8mb4_general_ci NOT NULL COMMENT '标题',\n  `summary` varchar(500) COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '摘要',\n  `cover_url` varchar(500) COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '封面URL',\n  `content_md` text COLLATE utf8mb4_general_ci COMMENT '正文（Markdown）',\n  `tags` varchar(500) COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '标签（逗号分隔）',\n  `publish_status` char(1) COLLATE utf8mb4_general_ci DEFAULT '0' COMMENT '发布状态（0草稿 1发布 2下线）',\n  `publish_time` datetime DEFAULT NULL COMMENT '发布时间',\n  `article_sort` int DEFAULT '0' COMMENT '显示顺序',\n  `status` char(1) COLLATE utf8mb4_general_ci DEFAULT '0' COMMENT '状态（0正常 1停用）',\n  `del_flag` char(1) COLLATE utf8mb4_general_ci DEFAULT '0' COMMENT '删除标志（0代表存在 2代表删除）',\n  `create_by` varchar(64) COLLATE utf8mb4_general_ci DEFAULT '''''' COMMENT '创建者',\n  `create_time` datetime DEFAULT NULL COMMENT '创建时间',\n  `update_by` varchar(64) COLLATE utf8mb4_general_ci DEFAULT '''''' COMMENT '更新者',\n  `update_time` datetime DEFAULT NULL COMMENT '更新时间',\n  `remark` varchar(500) COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '备注',\n  PRIMARY KEY (`article_id`)\n) ENGINE=InnoDB AUTO_INCREMENT=30005 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='教程文章表'",
+      "rows": [
+        {
+          "article_id": 30001,
+          "title": "DeskOps 软件库上手：如何快速找到并下载软件",
+          "summary": "本教程演示如何使用 DeskOps Portal 搜索/筛选并下载软件，并在文末展示“本文用到的软件”。",
+          "cover_url": null,
+          "content_md": "# DeskOps 软件库上手\n\n你可以通过以下方式快速找到需要的软件：\n\n- 关键词搜索（名称/描述/作者/标签）\n- 分类筛选\n- 许可证筛选\n- 平台筛选（仅展示有对应下载配置的软件）\n\n## 下载\n\n进入软件详情页后，在右侧「下载」区域选择平台即可。\n\n## 本文用到的软件\n\n下方会展示本文关联的软件卡片，点击可直接跳转到下载页。",
+          "tags": "入门,DeskOps,软件库,Portal",
+          "publish_status": "1",
+          "publish_time": "2026-03-16 22:32:35",
+          "article_sort": 100,
+          "status": "0",
+          "del_flag": "0",
+          "create_by": "admin",
+          "create_time": "2026-03-16 22:32:35",
+          "update_by": "admin",
+          "update_time": "2026-03-16 22:32:35",
+          "remark": "seed"
+        },
+        {
+          "article_id": 30002,
+          "title": "DeskOps 软件库上手：如何快速找到并下载软件",
+          "summary": "本教程演示如何使用 DeskOps Portal 搜索/筛选并下载软件，并在文末展示“本文用到的软件”。",
+          "cover_url": null,
+          "content_md": "# 自动生成脚本说明文档\n\n## 🎯 功能说明\n\n检查 `04-Scripts 🔧/` 文件夹中的所有脚本文件，为没有对应 Markdown 说明文档的脚本自动创建说明文档。\n\n## 📋 使用方法\n\n直接复制下面的提示词，粘贴给 AI 即可。\n\n---\n\n## 💬 提示词\n\n```\n请检查 `04-Scripts 🔧/` 文件夹及其所有子文件夹中的脚本文件（.bat、.ps1、.py、.sh、.java 等），并执行以下操作：\n\n1. **递归扫描脚本文件**\n   - 扫描 `04-Scripts 🔧/` 及其所有子文件夹\n   - 列出所有脚本文件（排除 .md 文件和 README.md）\n   - 检查每个脚本是否有同名的 .md 说明文档\n\n2. **创建缺失的说明文档**\n   - 如果脚本有对应的 .md 文件，跳过\n   - 如果没有，读取脚本内容并在同一目录创建同名的 .md 文件\n\n3. **说明文档格式要求**\n   每个 .md 文件必须包含以下部分：\n\n   ```markdown\n   # 脚本名称\n\n   ## 📝 功能说明\n   简短描述这个脚本的功能（1-2 句话）\n\n   ## 🚀 使用方法\n   1. 如何运行脚本\n   2. 需要的参数或配置\n   3. 预期的输出结果\n\n   ## ⚙️ 配置说明\n   - 需要修改的变量或配置项\n   - 依赖的环境或工具\n\n   ## 📌 注意事项\n   - 使用前的准备工作\n   - 常见问题或限制\n\n   ## 📄 源代码\n   ​```脚本语言\n   脚本的完整源代码\n   ​```\n   ```\n\n4. **输出结果**\n   - 告诉我创建了哪些新的说明文档\n   - 如果所有脚本都已有说明文档，告诉我\"所有脚本都已有说明文档\"\n\n要求：\n- 只创建缺失的 .md 文件，不要修改已存在的\n- 不要创建其他文件或修改脚本本身\n- 说明要简洁实用，不要过度解释\n- 源代码部分要完整复制脚本内容\n```\n\n---\n\n## 🔄 使用时机\n\n建议在以下情况使用此提示词：\n\n- ✅ 新增了脚本文件到 `04-Scripts 🔧/` 文件夹\n- ✅ 批量导入了多个脚本\n- ✅ 想检查是否所有脚本都有说明文档\n\n---\n\n## 💡 使用示例\n\n### 场景 1：新增了脚本\n\n```\n我刚添加了 \"backup-database.py\" 到 04-Scripts 文件夹。\n请为它创建说明文档。\n```\n\n### 场景 2：批量检查\n\n```\n请检查 04-Scripts 文件夹中的所有脚本，\n为缺少说明文档的脚本创建 .md 文件。\n```\n\n### 场景 3：更新说明文档\n\n```\n我修改了 \"deploy.sh\" 脚本的功能，\n请更新它的说明文档（重新生成）。\n```\n\n---\n\n## 📂 文件组织规则\n\n每个脚本文件必须配备同名的 Markdown 说明文档：\n\n```\n04-Scripts 🔧/\n├── cli启动代理.bat                    ← 通用脚本\n├── cli启动代理.md                     ← 说明文档\n├── 自动生成脚本说明文档.md             ← 本提示词文件\n├── README.md                          ← 总说明\n│\n└── Docker/                            ← 子文件夹（按功能分类）\n    ├── postgres-start.bat             ← 实际脚本\n    ├── postgres-start.md              ← 说明文档（同名）\n    ├── postgres-stop.bat\n    ├── postgres-stop.md\n    ├── postgres-reset.bat\n    └── postgres-reset.md\n```\n\n**命名规则**：`服务名-操作.bat`（如 `postgres-start.bat`），同一服务的脚本会自动聚在一起。\n\n---\n\n## ⚠️ 注意事项\n\n1. **文件名必须完全一致**\n   - 脚本：`cli启动代理.bat`\n   - 说明：`cli启动代理.md`（不是 `cli启动代理说明.md`）\n\n2. **不要手动编辑生成的文档**\n   - 如果脚本修改了，重新运行提示词生成新的说明文档\n   - 或者手动更新 .md 文件中的源代码部分\n\n3. **支持的脚本类型**\n   - Windows：`.bat`、`.ps1`、`.cmd`\n   - Linux/macOS：`.sh`、`.bash`\n   - Python：`.py`\n   - Java：`.java`\n   - 其他：`.js`、`.ts`、`.rb` 等\n\n4. **排除的文件**\n   - `.md` 文件本身\n   - `README.md`\n   - 隐藏文件（以 `.` 开头）\n",
+          "tags": "入门,DeskOps,软件库,Portal",
+          "publish_status": "0",
+          "publish_time": null,
+          "article_sort": 0,
+          "status": "0",
+          "del_flag": "0",
+          "create_by": "admin",
+          "create_time": "2026-03-16 23:04:30",
+          "update_by": "admin",
+          "update_time": "2026-03-16 23:04:30",
+          "remark": "seed"
+        },
+        {
+          "article_id": 30003,
+          "title": "DeskOps 软件库上手：如何快速找到并下载软件",
+          "summary": "本教程演示如何使用 DeskOps Portal 搜索/筛选并下载软件，并在文末展示“本文用到的软件”。",
+          "cover_url": null,
+          "content_md": "# 自动生成脚本说明文档\n\n## 🎯 功能说明\n\n检查 `04-Scripts 🔧/` 文件夹中的所有脚本文件，为没有对应 Markdown 说明文档的脚本自动创建说明文档。\n\n## 📋 使用方法\n\n直接复制下面的提示词，粘贴给 AI 即可。\n\n---\n\n## 💬 提示词\n\n```\n请检查 `04-Scripts 🔧/` 文件夹及其所有子文件夹中的脚本文件（.bat、.ps1、.py、.sh、.java 等），并执行以下操作：\n\n1. **递归扫描脚本文件**\n   - 扫描 `04-Scripts 🔧/` 及其所有子文件夹\n   - 列出所有脚本文件（排除 .md 文件和 README.md）\n   - 检查每个脚本是否有同名的 .md 说明文档\n\n2. **创建缺失的说明文档**\n   - 如果脚本有对应的 .md 文件，跳过\n   - 如果没有，读取脚本内容并在同一目录创建同名的 .md 文件\n\n3. **说明文档格式要求**\n   每个 .md 文件必须包含以下部分：\n\n   ```markdown\n   # 脚本名称\n\n   ## 📝 功能说明\n   简短描述这个脚本的功能（1-2 句话）\n\n   ## 🚀 使用方法\n   1. 如何运行脚本\n   2. 需要的参数或配置\n   3. 预期的输出结果\n\n   ## ⚙️ 配置说明\n   - 需要修改的变量或配置项\n   - 依赖的环境或工具\n\n   ## 📌 注意事项\n   - 使用前的准备工作\n   - 常见问题或限制\n\n   ## 📄 源代码\n   ​```脚本语言\n   脚本的完整源代码\n   ​```\n   ```\n\n4. **输出结果**\n   - 告诉我创建了哪些新的说明文档\n   - 如果所有脚本都已有说明文档，告诉我\"所有脚本都已有说明文档\"\n\n要求：\n- 只创建缺失的 .md 文件，不要修改已存在的\n- 不要创建其他文件或修改脚本本身\n- 说明要简洁实用，不要过度解释\n- 源代码部分要完整复制脚本内容\n```\n\n---\n\n## 🔄 使用时机\n\n建议在以下情况使用此提示词：\n\n- ✅ 新增了脚本文件到 `04-Scripts 🔧/` 文件夹\n- ✅ 批量导入了多个脚本\n- ✅ 想检查是否所有脚本都有说明文档\n\n---\n\n## 💡 使用示例\n\n### 场景 1：新增了脚本\n\n```\n我刚添加了 \"backup-database.py\" 到 04-Scripts 文件夹。\n请为它创建说明文档。\n```\n\n### 场景 2：批量检查\n\n```\n请检查 04-Scripts 文件夹中的所有脚本，\n为缺少说明文档的脚本创建 .md 文件。\n```\n\n### 场景 3：更新说明文档\n\n```\n我修改了 \"deploy.sh\" 脚本的功能，\n请更新它的说明文档（重新生成）。\n```\n\n---\n\n## 📂 文件组织规则\n\n每个脚本文件必须配备同名的 Markdown 说明文档：\n\n```\n04-Scripts 🔧/\n├── cli启动代理.bat                    ← 通用脚本\n├── cli启动代理.md                     ← 说明文档\n├── 自动生成脚本说明文档.md             ← 本提示词文件\n├── README.md                          ← 总说明\n│\n└── Docker/                            ← 子文件夹（按功能分类）\n    ├── postgres-start.bat             ← 实际脚本\n    ├── postgres-start.md              ← 说明文档（同名）\n    ├── postgres-stop.bat\n    ├── postgres-stop.md\n    ├── postgres-reset.bat\n    └── postgres-reset.md\n```\n\n**命名规则**：`服务名-操作.bat`（如 `postgres-start.bat`），同一服务的脚本会自动聚在一起。\n\n---\n\n## ⚠️ 注意事项\n\n1. **文件名必须完全一致**\n   - 脚本：`cli启动代理.bat`\n   - 说明：`cli启动代理.md`（不是 `cli启动代理说明.md`）\n\n2. **不要手动编辑生成的文档**\n   - 如果脚本修改了，重新运行提示词生成新的说明文档\n   - 或者手动更新 .md 文件中的源代码部分\n\n3. **支持的脚本类型**\n   - Windows：`.bat`、`.ps1`、`.cmd`\n   - Linux/macOS：`.sh`、`.bash`\n   - Python：`.py`\n   - Java：`.java`\n   - 其他：`.js`、`.ts`、`.rb` 等\n\n4. **排除的文件**\n   - `.md` 文件本身\n   - `README.md`\n   - 隐藏文件（以 `.` 开头）\n",
+          "tags": "入门,DeskOps,软件库,Portal",
+          "publish_status": "0",
+          "publish_time": null,
+          "article_sort": 0,
+          "status": "0",
+          "del_flag": "0",
+          "create_by": "admin",
+          "create_time": "2026-03-16 23:04:31",
+          "update_by": "admin",
+          "update_time": "2026-03-16 23:04:31",
+          "remark": "seed"
+        },
+        {
+          "article_id": 30004,
+          "title": "DeskOps 软件库上手：如何快速找到并下载软件",
+          "summary": "本教程演示如何使用 DeskOps Portal 搜索/筛选并下载软件，并在文末展示“本文用到的软件”。",
+          "cover_url": null,
+          "content_md": "# 自动生成脚本说明文档\n\n## 🎯 功能说明\n\n检查 `04-Scripts 🔧/` 文件夹中的所有脚本文件，为没有对应 Markdown 说明文档的脚本自动创建说明文档。\n\n## 📋 使用方法\n\n直接复制下面的提示词，粘贴给 AI 即可。\n\n---\n\n## 💬 提示词\n\n```\n请检查 `04-Scripts 🔧/` 文件夹及其所有子文件夹中的脚本文件（.bat、.ps1、.py、.sh、.java 等），并执行以下操作：\n\n1. **递归扫描脚本文件**\n   - 扫描 `04-Scripts 🔧/` 及其所有子文件夹\n   - 列出所有脚本文件（排除 .md 文件和 README.md）\n   - 检查每个脚本是否有同名的 .md 说明文档\n\n2. **创建缺失的说明文档**\n   - 如果脚本有对应的 .md 文件，跳过\n   - 如果没有，读取脚本内容并在同一目录创建同名的 .md 文件\n\n3. **说明文档格式要求**\n   每个 .md 文件必须包含以下部分：\n\n   ```markdown\n   # 脚本名称\n\n   ## 📝 功能说明\n   简短描述这个脚本的功能（1-2 句话）\n\n   ## 🚀 使用方法\n   1. 如何运行脚本\n   2. 需要的参数或配置\n   3. 预期的输出结果\n\n   ## ⚙️ 配置说明\n   - 需要修改的变量或配置项\n   - 依赖的环境或工具\n\n   ## 📌 注意事项\n   - 使用前的准备工作\n   - 常见问题或限制\n\n   ## 📄 源代码\n   ​```脚本语言\n   脚本的完整源代码\n   ​```\n   ```\n\n4. **输出结果**\n   - 告诉我创建了哪些新的说明文档\n   - 如果所有脚本都已有说明文档，告诉我\"所有脚本都已有说明文档\"\n\n要求：\n- 只创建缺失的 .md 文件，不要修改已存在的\n- 不要创建其他文件或修改脚本本身\n- 说明要简洁实用，不要过度解释\n- 源代码部分要完整复制脚本内容\n```\n\n---\n\n## 🔄 使用时机\n\n建议在以下情况使用此提示词：\n\n- ✅ 新增了脚本文件到 `04-Scripts 🔧/` 文件夹\n- ✅ 批量导入了多个脚本\n- ✅ 想检查是否所有脚本都有说明文档\n\n---\n\n## 💡 使用示例\n\n### 场景 1：新增了脚本\n\n```\n我刚添加了 \"backup-database.py\" 到 04-Scripts 文件夹。\n请为它创建说明文档。\n```\n\n### 场景 2：批量检查\n\n```\n请检查 04-Scripts 文件夹中的所有脚本，\n为缺少说明文档的脚本创建 .md 文件。\n```\n\n### 场景 3：更新说明文档\n\n```\n我修改了 \"deploy.sh\" 脚本的功能，\n请更新它的说明文档（重新生成）。\n```\n\n---\n\n## 📂 文件组织规则\n\n每个脚本文件必须配备同名的 Markdown 说明文档：\n\n```\n04-Scripts 🔧/\n├── cli启动代理.bat                    ← 通用脚本\n├── cli启动代理.md                     ← 说明文档\n├── 自动生成脚本说明文档.md             ← 本提示词文件\n├── README.md                          ← 总说明\n│\n└── Docker/                            ← 子文件夹（按功能分类）\n    ├── postgres-start.bat             ← 实际脚本\n    ├── postgres-start.md              ← 说明文档（同名）\n    ├── postgres-stop.bat\n    ├── postgres-stop.md\n    ├── postgres-reset.bat\n    └── postgres-reset.md\n```\n\n**命名规则**：`服务名-操作.bat`（如 `postgres-start.bat`），同一服务的脚本会自动聚在一起。\n\n---\n\n## ⚠️ 注意事项\n\n1. **文件名必须完全一致**\n   - 脚本：`cli启动代理.bat`\n   - 说明：`cli启动代理.md`（不是 `cli启动代理说明.md`）\n\n2. **不要手动编辑生成的文档**\n   - 如果脚本修改了，重新运行提示词生成新的说明文档\n   - 或者手动更新 .md 文件中的源代码部分\n\n3. **支持的脚本类型**\n   - Windows：`.bat`、`.ps1`、`.cmd`\n   - Linux/macOS：`.sh`、`.bash`\n   - Python：`.py`\n   - Java：`.java`\n   - 其他：`.js`、`.ts`、`.rb` 等\n\n4. **排除的文件**\n   - `.md` 文件本身\n   - `README.md`\n   - 隐藏文件（以 `.` 开头）\n",
+          "tags": "入门,DeskOps,软件库,Portal",
+          "publish_status": "0",
+          "publish_time": null,
+          "article_sort": 0,
+          "status": "0",
+          "del_flag": "0",
+          "create_by": "admin",
+          "create_time": "2026-03-16 23:04:43",
+          "update_by": "admin",
+          "update_time": "2026-03-16 23:04:43",
+          "remark": "seed"
+        }
+      ]
+    },
+    "tool_kb_article_software": {
+      "exists": true,
+      "create_sql": "CREATE TABLE `tool_kb_article_software` (\n  `id` bigint NOT NULL AUTO_INCREMENT COMMENT '主键ID',\n  `article_id` bigint NOT NULL COMMENT '文章ID',\n  `software_id` bigint NOT NULL COMMENT '软件ID',\n  `sort` int DEFAULT '0' COMMENT '显示顺序',\n  `remark` varchar(500) COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '备注',\n  `create_time` datetime DEFAULT NULL COMMENT '创建时间',\n  PRIMARY KEY (`id`)\n) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='教程文章关联软件表'",
+      "rows": [
+        {
+          "id": 1,
+          "article_id": 30001,
+          "software_id": 20001,
+          "sort": 0,
+          "remark": "seed",
+          "create_time": "2026-03-16 22:32:35"
+        },
+        {
+          "id": 2,
+          "article_id": 30002,
+          "software_id": 20001,
+          "sort": 0,
+          "remark": null,
+          "create_time": "2026-03-16 23:04:30"
+        },
+        {
+          "id": 3,
+          "article_id": 30003,
+          "software_id": 20001,
+          "sort": 0,
+          "remark": null,
+          "create_time": "2026-03-16 23:04:31"
+        },
+        {
+          "id": 4,
+          "article_id": 30004,
+          "software_id": 20001,
+          "sort": 0,
+          "remark": null,
+          "create_time": "2026-03-16 23:04:43"
+        }
+      ]
+    },
+    "tool_kb_category": {
+      "exists": true,
+      "create_sql": "CREATE TABLE `tool_kb_category` (\n  `category_id` bigint NOT NULL AUTO_INCREMENT COMMENT '分类ID',\n  `parent_id` bigint DEFAULT '0' COMMENT '父级ID（0为顶级）',\n  `category_code` varchar(64) COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '分类编码',\n  `category_name` varchar(100) COLLATE utf8mb4_general_ci NOT NULL COMMENT '分类名称',\n  `category_sort` int DEFAULT '0' COMMENT '显示顺序',\n  `status` char(1) COLLATE utf8mb4_general_ci DEFAULT '0' COMMENT '状态（0正常 1停用）',\n  `del_flag` char(1) COLLATE utf8mb4_general_ci DEFAULT '0' COMMENT '删除标志（0代表存在 2代表删除）',\n  `create_by` varchar(64) COLLATE utf8mb4_general_ci DEFAULT '''''' COMMENT '创建者',\n  `create_time` datetime DEFAULT NULL COMMENT '创建时间',\n  `update_by` varchar(64) COLLATE utf8mb4_general_ci DEFAULT '''''' COMMENT '更新者',\n  `update_time` datetime DEFAULT NULL COMMENT '更新时间',\n  `remark` varchar(500) COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '备注',\n  PRIMARY KEY (`category_id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='教程分类表'",
+      "rows": []
+    },
+    "tool_kb_tag": {
+      "exists": false
+    },
+    "tool_kb_article_tag": {
+      "exists": false
+    }
+  },
+  "menus": [
+    {
+      "menu_id": 124,
+      "menu_name": "教程管理",
+      "parent_id": 120,
+      "order_num": 4,
+      "path": "article",
+      "component": "tool/kb/article/index",
+      "query": "",
+      "route_name": "",
+      "is_frame": 1,
+      "is_cache": 0,
+      "menu_type": "C",
+      "visible": "0",
+      "status": "0",
+      "perms": "tool:kb:article:list",
+      "icon": "documentation",
+      "create_by": "admin",
+      "create_time": "2026-03-16 22:32:35",
+      "update_by": "",
+      "update_time": null,
+      "remark": "教程/博客文章管理菜单"
+    },
+    {
+      "menu_id": 1120,
+      "menu_name": "教程查询",
+      "parent_id": 124,
+      "order_num": 1,
+      "path": "",
+      "component": "",
+      "query": "",
+      "route_name": "",
+      "is_frame": 1,
+      "is_cache": 0,
+      "menu_type": "F",
+      "visible": "0",
+      "status": "0",
+      "perms": "tool:kb:article:query",
+      "icon": "#",
+      "create_by": "admin",
+      "create_time": "2026-03-16 22:32:35",
+      "update_by": "",
+      "update_time": null,
+      "remark": ""
+    },
+    {
+      "menu_id": 1121,
+      "menu_name": "教程新增",
+      "parent_id": 124,
+      "order_num": 2,
+      "path": "",
+      "component": "",
+      "query": "",
+      "route_name": "",
+      "is_frame": 1,
+      "is_cache": 0,
+      "menu_type": "F",
+      "visible": "0",
+      "status": "0",
+      "perms": "tool:kb:article:add",
+      "icon": "#",
+      "create_by": "admin",
+      "create_time": "2026-03-16 22:32:35",
+      "update_by": "",
+      "update_time": null,
+      "remark": ""
+    },
+    {
+      "menu_id": 1122,
+      "menu_name": "教程修改",
+      "parent_id": 124,
+      "order_num": 3,
+      "path": "",
+      "component": "",
+      "query": "",
+      "route_name": "",
+      "is_frame": 1,
+      "is_cache": 0,
+      "menu_type": "F",
+      "visible": "0",
+      "status": "0",
+      "perms": "tool:kb:article:edit",
+      "icon": "#",
+      "create_by": "admin",
+      "create_time": "2026-03-16 22:32:35",
+      "update_by": "",
+      "update_time": null,
+      "remark": ""
+    },
+    {
+      "menu_id": 1123,
+      "menu_name": "教程删除",
+      "parent_id": 124,
+      "order_num": 4,
+      "path": "",
+      "component": "",
+      "query": "",
+      "route_name": "",
+      "is_frame": 1,
+      "is_cache": 0,
+      "menu_type": "F",
+      "visible": "0",
+      "status": "0",
+      "perms": "tool:kb:article:remove",
+      "icon": "#",
+      "create_by": "admin",
+      "create_time": "2026-03-16 22:32:35",
+      "update_by": "",
+      "update_time": null,
+      "remark": ""
+    },
+    {
+      "menu_id": 1124,
+      "menu_name": "教程发布",
+      "parent_id": 124,
+      "order_num": 5,
+      "path": "",
+      "component": "",
+      "query": "",
+      "route_name": "",
+      "is_frame": 1,
+      "is_cache": 0,
+      "menu_type": "F",
+      "visible": "0",
+      "status": "0",
+      "perms": "tool:kb:article:publish",
+      "icon": "#",
+      "create_by": "admin",
+      "create_time": "2026-03-16 22:32:35",
+      "update_by": "",
+      "update_time": null,
+      "remark": ""
+    }
+  ],
+  "role_menus": [
+    {
+      "role_id": 2,
+      "menu_id": 124
+    },
+    {
+      "role_id": 2,
+      "menu_id": 1120
+    },
+    {
+      "role_id": 2,
+      "menu_id": 1121
+    },
+    {
+      "role_id": 2,
+      "menu_id": 1122
+    },
+    {
+      "role_id": 2,
+      "menu_id": 1123
+    },
+    {
+      "role_id": 2,
+      "menu_id": 1124
+    }
+  ]
+}

@@ -91,7 +91,9 @@
             collapse-tags-tooltip
             placeholder="输入标签后回车（支持逗号/换行/分号，会自动规整）"
             style="width: 100%"
-          />
+          >
+            <el-option v-for="t in tagOptions" :key="t.tagId" :label="t.tagName" :value="t.tagName" />
+          </el-select>
         </el-form-item>
 
         <el-divider content-position="left">正文（Markdown）</el-divider>
@@ -225,6 +227,7 @@ import 'markstream-vue/index.css'
 
 import { addKbArticle, getKbArticle, updateKbArticle } from '@/api/tool/kb/article'
 import { listKbCategoryOptions } from '@/api/tool/kb/category'
+import { listKbTagOptions } from '@/api/tool/kb/tag'
 import { getSoftwareItem, listSoftwareItem } from '@/api/tool/software/item'
 import { parseTime } from '@/utils/ruoyi'
 
@@ -243,6 +246,7 @@ const softwareOptions = ref([])
 const softwareSearchLoading = ref(false)
 const softwareMeta = ref({})
 const categoryOptions = ref([])
+const tagOptions = ref([])
 
 const publishStatusOptions = [
   { label: '草稿', value: '0' },
@@ -286,7 +290,7 @@ const formTagsList = computed({
   get: () => splitTags(form.tags || ''),
   set: (arr) => {
     const next = splitTags((arr || []).join(','))
-    form.tags = next.length ? next.join(',') : undefined
+    form.tags = next.length ? next.join(',') : ''
   }
 })
 
@@ -355,11 +359,27 @@ function softwarePublishTagType(value) {
 }
 
 function goList() {
-  router.push({ path: '/kb/article' }).catch(() => {
-    try {
-      router.back()
-    } catch (e) {}
-  })
+  const fallbackTimer = window.setTimeout(() => {
+    if (router.currentRoute.value?.path !== '/kb/article') {
+      window.location.assign('/kb/article')
+    }
+  }, 320)
+
+  Promise.resolve(router.push({ path: '/kb/article' }))
+    .then(() => {
+      if (router.currentRoute.value?.path === '/kb/article') {
+        window.clearTimeout(fallbackTimer)
+        return
+      }
+      try {
+        router.back()
+      } catch (e) {}
+    })
+    .catch(() => {
+      try {
+        router.back()
+      } catch (e) {}
+    })
 }
 
 async function hydrateSoftwares(ids) {
@@ -529,28 +549,31 @@ function submit(backToList) {
     const request = form.articleId ? updateKbArticle : addKbArticle
     const payload = {
       articleId: form.articleId,
-      categoryId: form.categoryId,
+      categoryId: form.categoryId ?? null,
       title: form.title,
-      summary: form.summary,
-      coverUrl: form.coverUrl,
-      contentMd: form.contentMd,
-      tags: form.tags,
+      summary: form.summary ?? null,
+      coverUrl: form.coverUrl ?? null,
+      contentMd: form.contentMd ?? null,
+      tags: form.tags ?? '',
       publishStatus: form.publishStatus,
       articleSort: form.articleSort,
       status: form.status,
-      remark: form.remark,
+      remark: form.remark ?? null,
       softwareIds: Array.isArray(form.softwareIds) ? form.softwareIds : []
     }
     request(payload)
       .then((res) => {
+        if (backToList) {
+          window.location.assign('/kb/article')
+          return
+        }
         proxy.$modal.msgSuccess(res?.msg || '保存成功')
         const nextId = form.articleId || res?.data?.articleId
         if (!form.articleId && nextId) {
           form.articleId = Number(nextId)
-          router.replace({ path: '/kb/article/edit', query: { articleId: form.articleId } })
-        }
-        if (backToList) {
-          goList()
+          router
+            .replace({ path: '/kb/article/edit', query: { articleId: form.articleId } })
+            .catch(() => {})
           return
         }
         loadDetail()
@@ -565,6 +588,12 @@ function submit(backToList) {
 listKbCategoryOptions()
   .then((res) => {
     categoryOptions.value = res.data || []
+  })
+  .catch(() => {})
+
+listKbTagOptions()
+  .then((res) => {
+    tagOptions.value = res.data || []
   })
   .catch(() => {})
 

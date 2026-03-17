@@ -88,11 +88,11 @@ create table if not exists tool_software_resource (
 -- 4、管理端菜单（一级菜单：放在首页后面）
 -- ----------------------------
 -- 目录：软件管理（用户业务核心）
-insert ignore into sys_menu values('120',  '软件管理', '0',   '0', 'software',  '',                          '', '', 1, 0, 'M', '0', '0', '',                          'download', 'admin', sysdate(), '', null, '软件管理目录（用户业务核心）');
+insert ignore into sys_menu values('120',  '软件管理', '0',   '0', 'software',  '',                          '', 'software',         1, 0, 'M', '0', '0', '',                          'download', 'admin', sysdate(), '', null, '软件管理目录（用户业务核心）');
 -- 菜单：分类管理 / 软件列表 / 软件详情（详情页用于查看&编辑单个软件的完整信息）
-insert ignore into sys_menu values('121',  '分类管理', '120', '1', 'category',  'tool/software/category/index', '', '', 1, 0, 'C', '0', '0', 'tool:software:category:list', 'dict',     'admin', sysdate(), '', null, '软件分类管理菜单');
-insert ignore into sys_menu values('122',  '软件列表', '120', '2', 'item',      'tool/software/item/index',     '', '', 1, 0, 'C', '0', '0', 'tool:software:item:list',     'component','admin', sysdate(), '', null, '软件列表菜单');
-insert ignore into sys_menu values('123',  '软件详情', '120', '3', 'detail',    'tool/software/item/detail/index', '', '', 1, 0, 'C', '0', '0', 'tool:software:item:list',     'component','admin', sysdate(), '', null, '软件详情页（查看/编辑）菜单');
+insert ignore into sys_menu values('121',  '分类管理', '120', '1', 'category',  'tool/software/category/index', '', 'softwarecategory', 1, 0, 'C', '0', '0', 'tool:software:category:list', 'dict',     'admin', sysdate(), '', null, '软件分类管理菜单');
+insert ignore into sys_menu values('122',  '软件列表', '120', '2', 'item',      'tool/software/item/index',     '', 'softwareitem',     1, 0, 'C', '0', '0', 'tool:software:item:list',     'component','admin', sysdate(), '', null, '软件列表菜单');
+insert ignore into sys_menu values('123',  '软件详情', '120', '3', 'detail',    'tool/software/item/detail/index', '', 'softwaredetail',   1, 0, 'C', '0', '0', 'tool:software:item:list',     'component','admin', sysdate(), '', null, '软件详情页（查看/编辑）菜单');
 
 -- 按钮权限：分类管理
 insert ignore into sys_menu values('1100', '分类查询', '121', '1',  '', '', '', '', 1, 0, 'F', '0', '0', 'tool:software:category:query',  '#', 'admin', sysdate(), '', null, '');

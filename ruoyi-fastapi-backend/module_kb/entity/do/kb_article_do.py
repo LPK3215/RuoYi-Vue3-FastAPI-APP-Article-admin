@@ -35,7 +35,7 @@ class ToolKbArticle(Base):
         String(500),
         nullable=True,
         server_default=SqlalchemyUtil.get_server_default_null(DataBaseConfig.db_type),
-        comment='标签（逗号分隔）',
+        comment='标签名称冗余缓存（逗号分隔）',
     )
     publish_status = Column(CHAR(1), nullable=True, server_default='0', comment='发布状态（0草稿 1发布 2下线）')
     publish_time = Column(DateTime, nullable=True, comment='发布时间')
@@ -72,6 +72,52 @@ class ToolKbArticleSoftware(Base):
         server_default=SqlalchemyUtil.get_server_default_null(DataBaseConfig.db_type),
         comment='备注',
     )
+    create_time = Column(DateTime, nullable=True, default=datetime.now, comment='创建时间')
+
+
+class ToolKbTag(Base):
+    """
+    教程标签表
+    """
+
+    __tablename__ = 'tool_kb_tag'
+    __table_args__ = {'comment': '教程标签表'}
+
+    tag_id = Column(BigInteger, primary_key=True, nullable=False, autoincrement=True, comment='标签ID')
+    tag_code = Column(
+        String(64),
+        nullable=True,
+        server_default=SqlalchemyUtil.get_server_default_null(DataBaseConfig.db_type),
+        comment='标签编码',
+    )
+    tag_name = Column(String(100), nullable=False, comment='标签名称')
+    tag_sort = Column(Integer, nullable=True, server_default='0', comment='显示顺序')
+    status = Column(CHAR(1), nullable=True, server_default='0', comment='状态（0正常 1停用）')
+    del_flag = Column(CHAR(1), nullable=True, server_default='0', comment='删除标志（0代表存在 2代表删除）')
+    create_by = Column(String(64), nullable=True, server_default="''", comment='创建者')
+    create_time = Column(DateTime, nullable=True, default=datetime.now, comment='创建时间')
+    update_by = Column(String(64), nullable=True, server_default="''", comment='更新者')
+    update_time = Column(DateTime, nullable=True, default=datetime.now, comment='更新时间')
+    remark = Column(
+        String(500),
+        nullable=True,
+        server_default=SqlalchemyUtil.get_server_default_null(DataBaseConfig.db_type),
+        comment='备注',
+    )
+
+
+class ToolKbArticleTag(Base):
+    """
+    教程文章关联标签表
+    """
+
+    __tablename__ = 'tool_kb_article_tag'
+    __table_args__ = {'comment': '教程文章关联标签表'}
+
+    id = Column(BigInteger, primary_key=True, nullable=False, autoincrement=True, comment='主键ID')
+    article_id = Column(BigInteger, nullable=False, comment='文章ID')
+    tag_id = Column(BigInteger, nullable=False, comment='标签ID')
+    sort = Column(Integer, nullable=True, server_default='0', comment='显示顺序')
     create_time = Column(DateTime, nullable=True, default=datetime.now, comment='创建时间')
 
 

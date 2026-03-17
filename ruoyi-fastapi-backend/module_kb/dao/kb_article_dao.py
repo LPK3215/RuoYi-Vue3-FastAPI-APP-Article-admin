@@ -1,11 +1,18 @@
 from typing import Any
 
-from sqlalchemy import and_, delete, desc, or_, select, update
+from sqlalchemy import and_, delete, desc, exists, or_, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from common.vo import PageModel
-from module_kb.entity.do.kb_article_do import ToolKbArticle, ToolKbArticleSoftware, ToolKbCategory
+from module_kb.entity.do.kb_article_do import (
+    ToolKbArticle,
+    ToolKbArticleSoftware,
+    ToolKbArticleTag,
+    ToolKbCategory,
+    ToolKbTag,
+)
 from module_kb.entity.vo.kb_article_vo import ToolKbArticleModel, ToolKbArticlePageQueryModel
+from utils.common_util import CamelCaseUtil
 from utils.page_util import PageUtil
 
 
@@ -33,6 +40,29 @@ class ToolKbArticleDao:
     ) -> PageModel | list[dict[str, Any]]:
         keyword = (query_object.keyword or '').strip()
         tag = (query_object.tag or '').strip()
+        relation_tag_clause = (
+            exists(
+                select(ToolKbArticleTag.id)
+                .select_from(ToolKbArticleTag)
+                .join(
+                    ToolKbTag,
+                    and_(
+                        ToolKbTag.tag_id == ToolKbArticleTag.tag_id,
+                        ToolKbTag.del_flag == '0',
+                    ),
+                )
+                .where(
+                    ToolKbArticleTag.article_id == ToolKbArticle.article_id,
+                    ToolKbArticleTag.tag_id == query_object.tag_id if query_object.tag_id else True,
+                    ToolKbTag.tag_name.like(f'%{tag}%') if tag else True,
+                )
+            )
+            if query_object.tag_id or tag
+            else True
+        )
+        tag_filter_clause = relation_tag_clause
+        if tag and not query_object.tag_id:
+            tag_filter_clause = or_(relation_tag_clause, ToolKbArticle.tags.like(f'%{tag}%'))
         query = (
             select(ToolKbArticle, ToolKbCategory)
             .select_from(ToolKbArticle)
@@ -45,7 +75,7 @@ class ToolKbArticleDao:
                 if keyword
                 else True,
                 ToolKbArticle.category_id == query_object.category_id if query_object.category_id else True,
-                ToolKbArticle.tags.like(f'%{tag}%') if tag else True,
+                tag_filter_clause,
                 ToolKbArticle.publish_status == query_object.publish_status if query_object.publish_status else True,
                 ToolKbArticle.status == query_object.status if query_object.status else True,
             )
@@ -65,7 +95,11 @@ class ToolKbArticleDao:
 
     @classmethod
     async def add_article_dao(cls, db: AsyncSession, article: ToolKbArticleModel) -> ToolKbArticle:
-        payload = article.model_dump(exclude={'article_id', 'software_ids'}, exclude_none=True, by_alias=False)
+        payload = article.model_dump(
+            exclude={'article_id', 'software_ids', 'tag_ids', 'tag_list', 'category_name'},
+            exclude_none=True,
+            by_alias=False,
+        )
         db_article = ToolKbArticle(**payload)
         db.add(db_article)
         await db.flush()
@@ -113,5 +147,70 @@ class ToolKbArticleSoftwareDao:
             ToolKbArticleSoftware(article_id=article_id, software_id=int(sid), sort=index)
             for index, sid in enumerate(software_ids)
         ]
+        db.add_all(items)
+        await db.flush()
+
+
+class ToolKbArticleTagDao:
+    """
+    教程文章-标签关联数据库操作层（管理端）
+    """
+
+    @classmethod
+    async def get_tag_ids_by_article_id(cls, db: AsyncSession, article_id: int) -> list[int]:
+        rows = (
+            (
+                await db.execute(
+                    select(ToolKbArticleTag.tag_id)
+                    .where(ToolKbArticleTag.article_id == article_id)
+                    .order_by(ToolKbArticleTag.sort, ToolKbArticleTag.id)
+                )
+            )
+            .scalars()
+            .all()
+        )
+        return [int(x) for x in (rows or [])]
+
+    @classmethod
+    async def get_tags_by_article_ids(cls, db: AsyncSession, article_ids: list[int]) -> dict[int, list[dict[str, Any]]]:
+        if not article_ids:
+            return {}
+        rows = (
+            await db.execute(
+                select(
+                    ToolKbArticleTag.article_id.label('article_id'),
+                    ToolKbTag.tag_id.label('tag_id'),
+                    ToolKbTag.tag_name.label('tag_name'),
+                )
+                .select_from(ToolKbArticleTag)
+                .join(
+                    ToolKbTag,
+                    and_(
+                        ToolKbTag.tag_id == ToolKbArticleTag.tag_id,
+                        ToolKbTag.del_flag == '0',
+                    ),
+                )
+                .where(ToolKbArticleTag.article_id.in_(article_ids))
+                .order_by(ToolKbArticleTag.sort, ToolKbArticleTag.id, ToolKbTag.tag_sort, ToolKbTag.tag_id)
+            )
+        ).all()
+        result: dict[int, list[dict[str, Any]]] = {int(article_id): [] for article_id in article_ids}
+        for row in rows or []:
+            item = CamelCaseUtil.transform_result(row)
+            article_id = int(item.get('articleId'))
+            result.setdefault(article_id, []).append(
+                {
+                    'tagId': item.get('tagId'),
+                    'tagName': item.get('tagName'),
+                }
+            )
+        return result
+
+    @classmethod
+    async def replace_article_tags(cls, db: AsyncSession, article_id: int, tag_ids: list[int]) -> None:
+        await db.execute(delete(ToolKbArticleTag).where(ToolKbArticleTag.article_id == article_id))
+        if not tag_ids:
+            return
+        items = [ToolKbArticleTag(article_id=article_id, tag_id=int(tag_id), sort=index) for index, tag_id in enumerate(tag_ids)]
         db.add_all(items)
         await db.flush()

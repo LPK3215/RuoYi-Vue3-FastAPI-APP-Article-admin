@@ -6,6 +6,17 @@ from pydantic.alias_generators import to_camel
 from pydantic_validation_decorator import NotBlank, Size
 
 
+class ToolKbArticleTagItemModel(BaseModel):
+    """
+    教程文章标签项模型
+    """
+
+    model_config = ConfigDict(alias_generator=to_camel, from_attributes=True)
+
+    tag_id: int = Field(description='标签ID')
+    tag_name: str = Field(description='标签名称')
+
+
 class ToolKbArticleModel(BaseModel):
     """
     教程文章表对应 pydantic 模型（管理端）
@@ -20,7 +31,9 @@ class ToolKbArticleModel(BaseModel):
     summary: str | None = Field(default=None, description='摘要')
     cover_url: str | None = Field(default=None, description='封面URL')
     content_md: str | None = Field(default=None, description='正文（Markdown）')
-    tags: str | None = Field(default=None, description='标签（逗号分隔）')
+    tags: str | None = Field(default=None, description='标签名称（逗号分隔，兼容旧前端）')
+    tag_ids: list[int] | None = Field(default=None, description='标签ID列表')
+    tag_list: list[ToolKbArticleTagItemModel] | None = Field(default=None, description='标签列表')
     publish_status: Literal['0', '1', '2'] | None = Field(default=None, description='发布状态（0草稿 1发布 2下线）')
     publish_time: datetime | None = Field(default=None, description='发布时间')
     article_sort: int | None = Field(default=None, description='显示顺序')
@@ -32,7 +45,7 @@ class ToolKbArticleModel(BaseModel):
     update_time: datetime | None = Field(default=None, description='更新时间')
     remark: str | None = Field(default=None, description='备注')
 
-    software_ids: list[int] | None = Field(default=None, description='关联的软件ID列表（用于保存）')
+    software_ids: list[int] | None = Field(default=None, description='关联的软件ID列表')
 
     @NotBlank(field_name='title', message='标题不能为空')
     @Size(field_name='title', min_length=0, max_length=200, message='标题长度不能超过200个字符')
@@ -69,7 +82,8 @@ class ToolKbArticlePageQueryModel(BaseModel):
     page_size: int = Field(default=10, description='每页记录数')
     keyword: str | None = Field(default=None, description='关键字（标题/摘要）')
     category_id: int | None = Field(default=None, description='分类ID')
-    tag: str | None = Field(default=None, description='标签（单个标签过滤）')
+    tag_id: int | None = Field(default=None, description='标签ID')
+    tag: str | None = Field(default=None, description='标签名称（单个标签过滤）')
     publish_status: Literal['0', '1', '2'] | None = Field(default=None, description='发布状态')
     status: Literal['0', '1'] | None = Field(default=None, description='状态（0正常 1停用）')
 

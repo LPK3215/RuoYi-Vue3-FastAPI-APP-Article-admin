@@ -16,13 +16,17 @@
         </el-select>
       </el-form-item>
       <el-form-item label="标签" prop="tag">
-        <el-input
+        <el-select
           v-model="queryParams.tag"
-          placeholder="单个标签"
+          placeholder="选择/输入标签"
           clearable
+          filterable
+          allow-create
+          default-first-option
           style="width: 200px"
-          @keyup.enter="handleQuery"
-        />
+        >
+          <el-option v-for="t in tagOptions" :key="t.tagId" :label="t.tagName" :value="t.tagName" />
+        </el-select>
       </el-form-item>
       <el-form-item label="发布" prop="publishStatus">
         <el-select v-model="queryParams.publishStatus" placeholder="全部" clearable style="width: 160px">
@@ -216,6 +220,7 @@
 <script setup name="KbArticleIndex">
 import { changeKbArticlePublishStatus, delKbArticle, listKbArticle } from '@/api/tool/kb/article'
 import { listKbCategoryOptions } from '@/api/tool/kb/category'
+import { listKbTagOptions } from '@/api/tool/kb/tag'
 import { parseTime } from '@/utils/ruoyi'
 
 const { proxy } = getCurrentInstance()
@@ -232,6 +237,7 @@ const ids = ref([])
 const single = ref(true)
 const multiple = ref(true)
 const categoryOptions = ref([])
+const tagOptions = ref([])
 
 const publishStatusOptions = [
   { label: '草稿', value: '0' },
@@ -387,6 +393,12 @@ getList()
 listKbCategoryOptions()
   .then((res) => {
     categoryOptions.value = res.data || []
+  })
+  .catch(() => {})
+
+listKbTagOptions()
+  .then((res) => {
+    tagOptions.value = res.data || []
   })
   .catch(() => {})
 </script>

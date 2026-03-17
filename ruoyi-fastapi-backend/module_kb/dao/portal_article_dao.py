@@ -1,10 +1,16 @@
 from typing import Any
 
-from sqlalchemy import and_, desc, func, or_, select
+from sqlalchemy import and_, desc, exists, func, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from common.vo import PageModel
-from module_kb.entity.do.kb_article_do import ToolKbArticle, ToolKbArticleSoftware, ToolKbCategory
+from module_kb.entity.do.kb_article_do import (
+    ToolKbArticle,
+    ToolKbArticleSoftware,
+    ToolKbArticleTag,
+    ToolKbCategory,
+    ToolKbTag,
+)
 from module_kb.entity.vo.portal_article_vo import PortalArticlePageQueryModel
 from module_software.entity.do.software_do import ToolSoftware, ToolSoftwareCategory
 from utils.common_util import CamelCaseUtil
@@ -78,6 +84,29 @@ class PortalArticleDao:
     ) -> PageModel | list[dict[str, Any]]:
         keyword = (query_object.keyword or '').strip()
         tag = (query_object.tag or '').strip()
+        relation_tag_clause = (
+            exists(
+                select(ToolKbArticleTag.id)
+                .select_from(ToolKbArticleTag)
+                .join(
+                    ToolKbTag,
+                    and_(
+                        ToolKbTag.tag_id == ToolKbArticleTag.tag_id,
+                        ToolKbTag.del_flag == '0',
+                    ),
+                )
+                .where(
+                    ToolKbArticleTag.article_id == ToolKbArticle.article_id,
+                    ToolKbArticleTag.tag_id == query_object.tag_id if query_object.tag_id else True,
+                    ToolKbTag.tag_name.like(f'%{tag}%') if tag else True,
+                )
+            )
+            if query_object.tag_id or tag
+            else True
+        )
+        tag_filter_clause = relation_tag_clause
+        if tag and not query_object.tag_id:
+            tag_filter_clause = or_(relation_tag_clause, ToolKbArticle.tags.like(f'%{tag}%'))
         query = (
             select(ToolKbArticle)
             .select_from(ToolKbArticle)
@@ -92,7 +121,7 @@ class PortalArticleDao:
                 if keyword
                 else True,
                 ToolKbArticle.category_id == query_object.category_id if query_object.category_id else True,
-                ToolKbArticle.tags.like(f'%{tag}%') if tag else True,
+                tag_filter_clause,
             )
             .order_by(desc(ToolKbArticle.article_sort), desc(ToolKbArticle.publish_time), desc(ToolKbArticle.article_id))
             .distinct()

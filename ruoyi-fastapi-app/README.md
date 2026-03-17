@@ -1,135 +1,221 @@
-# RuoYi-FastAPI-App
+# ruoyi-fastapi-app（App / H5 使用说明）
 
-基于 `uni-app` 的 `vite` + `vue3` + `tailwindcss` 开发。
+本目录是基于 uni-app 的客户端工程，支持：
 
-## SoftwareHub：本机联调与部署要点
+- H5
+- 微信小程序
+- 原生 APP
+- 其他 uni-app 支持的平台
 
-### 1) 配置后端地址（必须）
+---
 
-用户端请求基地址在：
+## 1. 环境要求
 
-- `src/config.js` → `baseUrl`
+- Node.js：建议 `^20.19.0 || >=22.12.0`
+- pnpm：项目默认使用 `pnpm@10`
 
-本机开发常用：
+---
 
-- `http://localhost:9099`
+## 2. 环境切换方式
 
-如果你部署后端走 Nginx 并使用 `/prod-api` 前缀（推荐与管理端一致），可配置为：
+当前 App 没有独立的 `.env.*`，而是通过：
 
-- `https://your-domain.com/prod-api`
+- `src/config.js`
 
-> 原则：`baseUrl + 接口路径` 必须能直接访问到后端接口。
+来切换后端请求地址。
 
-### 2) 开发启动（H5 预览最方便）
+### 当前关键配置
 
-进入目录：
+```js
+export default {
+  baseUrl: "http://localhost:9099",
+}
+```
+
+### 常见场景
+
+| 场景 | `baseUrl` 示例 |
+|------|----------------|
+| 本机开发 | `http://localhost:9099` |
+| 本机同局域网真机调试 | `http://你的电脑IP:9099` |
+| 生产部署 | `https://your-domain.com/prod-api` |
+| 预发布 | `https://stage.your-domain.com/stage-api` |
+
+原则：
+
+- `baseUrl + 接口路径` 必须能直接请求到后端
+
+---
+
+## 3. 首次安装
 
 ```bash
 cd ruoyi-fastapi-app
-```
-
-安装依赖：
-
-```bash
-npm i -g pnpm
 pnpm install
 ```
 
-启动 H5：
+如果你刚刚重命名、移动过这个项目目录，建议重新执行一次：
+
+```bash
+pnpm install
+```
+
+原因是 `pnpm` 生成的 `.bin` 启动脚本在 Windows 下可能会缓存旧路径。
+
+---
+
+## 4. 常用启动命令
+
+### H5
 
 ```bash
 pnpm dev:h5
 ```
 
-通常访问地址：
+通常访问：
 
-- `http://localhost:9090`（如果被占用会自动尝试 `9091/9092/...`，以终端输出为准）
+- `http://localhost:9090`
 
-### 3) 部署（常用：H5）
+如果端口占用，uni-app 会自动尝试其他端口，以终端输出为准。
 
-构建 H5：
+### 微信小程序
+
+```bash
+pnpm dev:mp-weixin
+```
+
+### APP
+
+```bash
+pnpm dev:app
+```
+
+### 其他平台
+
+```bash
+pnpm dev:mp-qq
+pnpm dev:mp-alipay
+pnpm dev:quickapp-webview
+```
+
+---
+
+## 5. 常用构建命令
+
+### H5
 
 ```bash
 pnpm build:h5
 ```
 
-产物一般在：
+### 微信小程序
 
-- `dist/build/h5/`
+```bash
+pnpm build:mp-weixin
+```
 
-将该目录部署到任意静态服务器（Nginx/OSS/Netlify 等）即可。
+### APP
 
-## 特性
+```bash
+pnpm build:app
+```
 
-- ⚡️ [Vue 3](https://github.com/vuejs/core), [Vite](https://github.com/vitejs/vite), [pnpm](https://pnpm.io/) - 快 & 稳定
+### 其他平台
 
-- 🎨 [TailwindCSS](https://tailwindcss.com/) - 世界上最流行，生态最好的原子化CSS框架
+```bash
+pnpm build:mp-qq
+pnpm build:mp-alipay
+pnpm build:quickapp-webview
+```
 
-- 😃 [集成 Iconify](https://github.com/egoist/tailwindcss-icons) - [icones.js.org](https://icones.js.org/) 中的所有图标都为你所用
+---
 
-- 📥 [API 自动加载](https://github.com/antfu/unplugin-auto-import) - 直接使用 Composition API 无需引入
+## 6. 构建产物
 
-- 🧬 [uni-app 条件编译样式](https://tw.icebreaker.top/docs/quick-start/uni-app-css-macro) - 帮助你在多端更灵活的使用 `TailwindCSS`
+常见输出目录：
 
-- 🦾 [TypeScript](https://www.typescriptlang.org/) & [ESLint](https://eslint.org/) & [Stylelint](https://stylelint.io/) - 样式，类型，统一的校验与格式化规则，保证你的代码风格和质量
+| 平台 | 输出目录 |
+|------|----------|
+| H5 | `dist/build/h5/` |
+| 微信小程序（生产） | `dist/build/mp-weixin/` |
+| 微信小程序（开发） | `dist/dev/mp-weixin/` |
 
-## 快速开始
+---
 
-> [!IMPORTANT]
-> 推荐使用 `"node": "^20.19.0 || >=22.12.0"` 的 Node.js 版本进行开发!
->
-> 另外谨慎升级 `package.json` 中锁定的 `pinia`/`vue`/`@vue/*` 相关包的版本，新版本可能 `uni-app` 没有兼容，造成一些奇怪的 bug
+## 7. 微信开发者工具辅助命令
 
-### vscode
+项目已经集成 `weapp-ide-cli`：
 
-使用 `vscode` 的开发者，请先安装 [Tailwind CSS IntelliSense](https://marketplace.visualstudio.com/items?itemName=bradlc.vscode-tailwindcss) 智能提示与感应插件
+```bash
+pnpm open:dev
+pnpm open:build
+pnpm weapp:login
+```
 
-其他 IDE 请参考: <https://tw.icebreaker.top/docs/quick-start/intelliSense>
+如需上传：
 
-### 更换 Appid
+```bash
+pnpm upload:dev
+pnpm upload:build
+```
 
-把 `src/manifest.json` 中的 `appid`, 更换为你自己的 `appid`, 比如 `uni-app` / `mp-weixin` 平台。
+---
 
-## 升级依赖
+## 8. 其他关键配置
 
-- `pnpm up:pkg` 升级除了 `uni-app` 相关的其他依赖
-- `pnpm up:uniapp` 升级 `uni-app` 相关的依赖
+### App 名称 / 标题 / AppID
 
-推荐先使用 `pnpm up:pkg` 升级, 再使用 `pnpm up:uniapp` 进行升级，因为 `pnpm up:uniapp` 很有可能会进行版本的降级已达到和 `uni-app` 版本匹配的效果
+重点文件：
 
-## 切换镜像源
+- `src/manifest.json`
+- `src/pages.json`
 
-默认情况下，走的是淘宝镜像源 : `registry.npmmirror.com`
+常见需要改的内容：
 
-假如你需要修改镜像源，请修改目录下的 `.npmrc` 文件，然后重新进行 `pnpm i` 安装包即可
+- App 名称
+- 页面标题
+- 各平台 `appid`
 
-## 包管理器
+### 应用信息
 
-本项目默认使用 `pnpm@10` 进行管理，当然你也可以切换到其他包管理器，比如 `yarn`, `npm`
+可在 `src/config.js` 中修改：
 
-你只需要把 `pnpm-lock.yaml` 删掉，然后把 `package.json` 中的 `packageManager` 字段去除或者换成你具体的包管理器版本，然后重新安装即可
+- `appInfo.name`
+- `appInfo.version`
+- `appInfo.logo`
+- `appInfo.site_url`
+- 协议链接
 
-### weapp-ide-cli
+---
 
-本项目已经集成 `weapp-ide-cli` 可以通过 `cli` 对 `ide` 进行额外操作
+## 9. 常见问题
 
-- `pnpm open:dev` 打开微信开发者工具，引入 `dist/dev/mp-weixin`
-- `pnpm open:build` 打开微信开发者工具，引入 `dist/build/mp-weixin`
+### 改了目录名后 `uni` 命令报错
 
-[详细信息](https://www.npmjs.com/package/weapp-ide-cli)
+请重新运行：
 
-## tailwindcss 生态
+```bash
+pnpm install
+```
 
-详见：<https://github.com/aniftyco/awesome-tailwindcss>
+### H5 能打开但请求失败
 
-你可以在这里找到许多现成的UI，组件模板。
+通常是 `src/config.js` 里的 `baseUrl` 没改对：
 
-## 单位转换
+- 本机浏览器开发用 `http://localhost:9099`
+- 真机联调用你电脑的局域网 IP
 
-- `rem` -> `rpx` (默认开启, 见 `vite.config.ts` 中 `uvtw` 插件的 `rem2rpx` 选项)
-- `px` -> `rpx` (默认不开启，可在 `postcss.config.ts` 中引入 `postcss-pxtransform` 开启配置)
+### 小程序无法打开
 
-## Tips
+确认：
 
-- 升级 `uni-app` 依赖的方式为 `npx @dcloudio/uvm` 后，选择对应的 `Package Manager` 即可。而升级其他包的方式，可以使用 `pnpm up -Li`，这个是 `pnpm` 自带的方式。
-- 使用 `vscode` 记得安装官方插件 `stylelint`,`tailwindcss`, 已在 `.vscode/extensions.json` 中设置推荐
+1. `src/manifest.json` 的 `appid` 已配置
+2. 微信开发者工具已登录
+3. 目标目录是正确的 `dist/dev/mp-weixin` 或 `dist/build/mp-weixin`
+
+---
+
+## 10. 进一步阅读
+
+- [部署说明](./DEPLOY.md)
+- [仓库总说明](../README.md)

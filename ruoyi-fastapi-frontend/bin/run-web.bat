@@ -1,12 +1,10 @@
 @echo off
 echo.
-echo [信息] 使用 Vite 命令运行 Web 工程。
+echo [INFO] Starting admin web dev server...
 echo.
 
-%~d0
-cd %~dp0
-
+cd /d "%~dp0"
 cd ..
-yarn dev
+npm run dev
 
 pause

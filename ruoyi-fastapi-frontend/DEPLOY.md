@@ -1,99 +1,72 @@
-# DeskOps 软件库管理后台（ruoyi-fastapi-frontend）部署文档
+# ruoyi-fastapi-frontend（管理后台部署说明）
 
-本目录为 **后台管理系统 Web**（Vue3 + Vite + Element Plus）。
-
-> 配套后端：`ruoyi-fastapi-backend`（默认 `http://127.0.0.1:9099`）。
+本文件聚焦管理后台的构建和部署。
 
 ---
 
-## 环境要求
+## 1. 构建模式
 
-- Node.js 18+（推荐 20+）
-- npm / pnpm / yarn 任一（本项目自带 `package-lock.json`，默认按 npm 使用）
+当前 `package.json` 已提供：
 
----
+| 命令 | 配置文件 | 适用场景 | API 前缀 |
+|------|----------|----------|----------|
+| `npm run build:prod` | `.env.production` | 正式环境 | `/prod-api` |
+| `npm run build:stage` | `.env.staging` | 预发布环境 | `/stage-api` |
+| `npm run build:docker` | `.env.docker` | Docker 环境 | `/docker-api` |
 
-## 本机开发
-
-### 1) 安装依赖
-
-```bash
-cd ruoyi-fastapi-frontend
-npm install
-```
-
-### 2) 启动开发服务器
+如果只是本机调试，不需要构建，直接：
 
 ```bash
 npm run dev
 ```
 
-默认端口由 `vite.config.js` 指定为 `80`，访问：
-
-- `http://localhost:80`
-
-### 3) API 代理（重要）
-
-开发环境 API 前缀在 `.env.development`：
-
-```ini
-VITE_APP_BASE_API = '/dev-api'
-```
-
-并且 `vite.config.js` 已配置代理：
-
-- `/dev-api` → `http://127.0.0.1:9099`（自动去掉 `/dev-api` 前缀再转发）
-
-如果后端端口不是 `9099`，请修改 `vite.config.js` 里的 `server.proxy['/dev-api'].target`。
-
-### 4) 品牌配置（可选）
-
-在 `.env.*` 中可自定义后台标题/Logo 文本/登录页底部文字：
-
-- `VITE_APP_TITLE`：页面标题（浏览器 tab）与系统名称
-- `VITE_APP_LOGO_TEXT`：侧边栏 Logo 文本（为空时回退为 `VITE_APP_TITLE`）
-- `VITE_APP_FOOTER`：登录页底部文字（可留空）
-
 ---
 
-## 生产构建
-
-### 1) 选择环境
-
-常用构建命令（见 `package.json`）：
+## 2. 安装与构建
 
 ```bash
-npm run build:prod    # 生产
-npm run build:stage   # 预发布/测试
-npm run build:docker  # Docker 环境
+cd ruoyi-fastapi-frontend
+npm ci
+npm run build:prod
 ```
 
-构建产物输出到：
+构建产物：
 
-- `ruoyi-fastapi-frontend/dist/`
-
-### 2) 与后端的路径约定（重要）
-
-生产环境前端默认（见 `.env.production`）：
-
-```ini
-VITE_APP_BASE_API = '/prod-api'
-```
-
-后端生产环境建议（见 `ruoyi-fastapi-backend/.env.prod`）：
-
-```ini
-APP_ROOT_PATH = '/prod-api'
-```
-
-建议使用 Nginx：
-
-- 静态资源托管在 `/`
-- `/prod-api/` 反向代理到后端 `9099`，并去掉 `/prod-api` 前缀再转发
+- `dist/`
 
 ---
 
-## Nginx 部署示例
+## 3. 部署前对齐项
+
+### 前端
+
+确认当前构建模式对应的 API 前缀：
+
+- `.env.production` -> `/prod-api`
+- `.env.staging` -> `/stage-api`
+- `.env.docker` -> `/docker-api`
+
+### 后端
+
+确认后端对应环境中的：
+
+- `APP_ROOT_PATH`
+
+必须和前端前缀一致。
+
+例如：
+
+| 前端构建 | 后端环境 |
+|----------|----------|
+| `build:prod` | `.env.prod` 中 `/prod-api` |
+| `build:stage` | 你自建 `.env.stage` 中 `/stage-api` |
+| `build:docker` | `.env.dockermy` / `.env.dockerpg` 中 `/docker-api` |
+
+---
+
+## 4. Nginx 部署示例
+
+### 正式环境 `/prod-api`
 
 ```nginx
 server {
@@ -117,26 +90,83 @@ server {
 }
 ```
 
+### 预发布 `/stage-api`
+
+```nginx
+server {
+  listen 80;
+  server_name stage.your-domain.com;
+
+  root /var/www/softwarehub-admin-stage;
+  index index.html;
+
+  location / {
+    try_files $uri $uri/ /index.html;
+  }
+
+  location /stage-api/ {
+    proxy_pass http://127.0.0.1:9099/;
+    proxy_set_header Host $host;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto $scheme;
+  }
+}
+```
+
+### Docker `/docker-api`
+
+Docker 场景已经内置在：
+
+- `bin/nginx.dockermy.conf`
+- `bin/nginx.dockerpg.conf`
+
+如果使用根目录 compose，无需再手工写一份。
+
 ---
 
-## 主题说明（UI）
+## 5. Docker 构建
 
-- 主题模式（暗黑/亮色）切换会同步影响侧边栏风格，避免“页面亮色但菜单固定黑色”的割裂感。
-- 下拉类组件（Select/Dropdown/Autocomplete/Cascader 等）已统一为更一致的暗黑/亮色外观。
+当前 Dockerfile 会执行：
+
+```bash
+npm run build:docker
+```
+
+然后把 `dist/` 拷贝到 Nginx 镜像中。
+
+如果要手工构建：
+
+```bash
+docker build -t deskops-admin ./ruoyi-fastapi-frontend
+```
 
 ---
 
-## 常见问题
+## 6. 部署后验证
 
-### 1) 端口 80 被占用
+建议依次检查：
 
-修改 `vite.config.js`：
+1. 首页是否能打开
+2. 登录接口是否成功
+3. 刷新任意内部路由是否正常
+4. 上传、下载、导出是否正常
 
-- `server.port: 80` → 改为可用端口（如 `5173`）
+---
 
-### 2) 刷新页面 404
+## 7. 常见问题
 
-这是 SPA 路由问题，需要 Nginx 的 `try_files`：
+### 构建后接口 404 / 502
+
+通常是这三类问题：
+
+1. 前端 API 前缀和后端 `APP_ROOT_PATH` 不一致
+2. Nginx 没有转发对应前缀
+3. `proxy_pass` 结尾缺少 `/`
+
+### 页面打开正常，刷新子路由 404
+
+确保启用了：
 
 ```nginx
 location / {
@@ -144,9 +174,10 @@ location / {
 }
 ```
 
-### 3) 默认登录信息
+### Docker 环境接口不通
 
-初始化 SQL 自带默认管理员账号：
+确认使用的是：
 
-- 用户名：`admin`
-- 密码：`admin123`
+- `.env.docker`
+- 后端 `.env.dockermy` 或 `.env.dockerpg`
+- 对应的 Nginx 配置也是 `/docker-api`

@@ -6,7 +6,7 @@ from typing import Any
 from jinja2 import Environment, FileSystemLoader
 
 from common.constant import GenConstant
-from config.env import DataBaseConfig
+from config.env import DataBaseConfig, resolve_backend_path
 from exceptions.exception import ServiceWarning
 from module_generator.entity.vo.gen_vo import GenTableColumnModel, GenTableModel
 from utils.common_util import CamelCaseUtil, SnakeCaseUtil
@@ -26,7 +26,7 @@ class TemplateInitializer:
         :return: Jinja2 环境对象
         """
         try:
-            template_dir = os.path.join(os.getcwd(), 'module_generator', 'templates')
+            template_dir = resolve_backend_path('module_generator', 'templates')
             env = Environment(
                 loader=FileSystemLoader(template_dir),
                 keep_trailing_newline=True,

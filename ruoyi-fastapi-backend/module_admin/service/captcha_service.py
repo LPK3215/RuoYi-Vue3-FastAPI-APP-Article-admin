@@ -5,6 +5,8 @@ import random
 import anyio
 from PIL import Image, ImageDraw, ImageFont
 
+from config.env import resolve_backend_path
+
 
 class CaptchaService:
     """
@@ -20,7 +22,7 @@ class CaptchaService:
         draw = ImageDraw.Draw(image)
 
         # 设置字体
-        font_path = (await anyio.Path.cwd()) / 'assets' / 'font' / 'Arial.ttf'
+        font_path = await anyio.Path(resolve_backend_path('assets', 'font', 'Arial.ttf')).resolve()
         font = ImageFont.truetype(font_path, size=30)
 
         # 生成两个0-9之间的随机整数
