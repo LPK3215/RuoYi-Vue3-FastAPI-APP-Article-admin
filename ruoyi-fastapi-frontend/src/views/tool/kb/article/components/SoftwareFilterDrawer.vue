@@ -126,6 +126,26 @@
         </el-row>
 
         <el-row :gutter="12">
+          <el-col :span="12">
+            <el-form-item label="排序">
+              <el-select v-model="query.orderByColumn" placeholder="更新时间" style="width: 100%">
+                <el-option label="更新时间" value="updateTime" />
+                <el-option label="名称" value="softwareName" />
+                <el-option label="显示顺序" value="softwareSort" />
+              </el-select>
+            </el-form-item>
+          </el-col>
+          <el-col :span="12">
+            <el-form-item label="顺序">
+              <el-select v-model="query.isAsc" placeholder="倒序" style="width: 100%">
+                <el-option label="倒序" value="descending" />
+                <el-option label="正序" value="ascending" />
+              </el-select>
+            </el-form-item>
+          </el-col>
+        </el-row>
+
+        <el-row :gutter="12">
           <el-col :span="24">
             <el-form-item label="数据质量">
               <div class="quality-row">
@@ -189,7 +209,9 @@
         <el-table-column label="操作" width="190" align="center">
           <template #default="scope">
             <el-button link type="primary" icon="View" @click="emit('view', scope.row)">查看</el-button>
-            <el-button link type="primary" icon="Plus" @click="emit('pick', scope.row)">添加</el-button>
+            <el-button link type="primary" icon="Plus" :disabled="isSelected(scope.row.softwareId)" @click="emit('pick', scope.row)">
+              {{ isSelected(scope.row.softwareId) ? '已添加' : '添加' }}
+            </el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -213,7 +235,8 @@ import { getSoftwareItemFacets, listSoftwareItem } from '@/api/tool/software/ite
 import { parseTime } from '@/utils/ruoyi'
 
 const props = defineProps({
-  modelValue: { type: Boolean, default: false }
+  modelValue: { type: Boolean, default: false },
+  selectedIds: { type: Array, default: () => [] }
 })
 
 const emit = defineEmits(['update:modelValue', 'pick', 'view'])
@@ -248,7 +271,9 @@ const query = reactive({
   team: undefined,
   platform: undefined,
   openSource: undefined,
-  publishStatus: undefined
+  publishStatus: undefined,
+  orderByColumn: 'updateTime',
+  isAsc: 'descending'
 })
 
 const rows = ref([])
@@ -291,6 +316,8 @@ function buildRequestParams() {
     platform: query.platform || undefined,
     openSource: query.openSource,
     publishStatus: onlyPublished.value ? '1' : query.publishStatus || undefined,
+    orderByColumn: query.orderByColumn || undefined,
+    isAsc: query.isAsc || undefined,
     hasIcon: quality.hasIcon ? '1' : undefined,
     hasLicense: quality.hasLicense ? '1' : undefined,
     hasOfficialUrl: quality.hasOfficialUrl ? '1' : undefined,
@@ -310,6 +337,13 @@ function emitPickSelected() {
     emit('pick', row)
   }
   selectedRows.value = []
+}
+
+function isSelected(softwareId) {
+  const n = Number(softwareId)
+  if (!Number.isFinite(n) || n <= 0) return false
+  const ids = Array.isArray(props.selectedIds) ? props.selectedIds : []
+  return ids.map((x) => Number(x)).some((x) => Number.isFinite(x) && x === n)
 }
 
 async function reloadFacets() {
@@ -382,7 +416,19 @@ watch(
 )
 
 watch(
-  () => [query.keyword, query.categoryId, query.tag, query.license, query.author, query.team, query.platform, query.openSource, query.publishStatus],
+  () => [
+    query.keyword,
+    query.categoryId,
+    query.tag,
+    query.license,
+    query.author,
+    query.team,
+    query.platform,
+    query.openSource,
+    query.publishStatus,
+    query.orderByColumn,
+    query.isAsc
+  ],
   () => {
     queueQuery()
   }

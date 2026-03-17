@@ -238,6 +238,7 @@
 
         <SoftwareFilterDrawer
           v-model="softwareFilterDrawerOpen"
+          :selected-ids="form.softwareIds"
           @pick="onDrawerPickSoftware"
           @view="onDrawerViewSoftware"
         />
