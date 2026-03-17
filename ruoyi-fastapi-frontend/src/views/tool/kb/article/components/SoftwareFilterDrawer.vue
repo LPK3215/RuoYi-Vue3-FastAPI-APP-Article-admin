@@ -255,6 +255,7 @@ const props = defineProps({
 })
 
 const emit = defineEmits(['update:modelValue', 'pick', 'view'])
+const { proxy } = getCurrentInstance() || { proxy: undefined }
 
 const open = computed({
   get: () => props.modelValue,
@@ -367,10 +368,23 @@ function onSelectionChange(list) {
 
 function emitPickSelected() {
   const list = selectedRows.value || []
+  let skipped = 0
   for (const row of list) {
+    if (isSelected(row?.softwareId)) {
+      skipped += 1
+      continue
+    }
     emit('pick', row)
   }
   selectedRows.value = []
+
+  if (skipped > 0) {
+    try {
+      proxy?.$modal?.msgWarning?.(`已跳过 ${skipped} 个已添加的软件`)
+    } catch (e) {
+      // ignore
+    }
+  }
 }
 
 function isSelected(softwareId) {

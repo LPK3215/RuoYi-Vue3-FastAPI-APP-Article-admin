@@ -182,7 +182,18 @@
           </el-col>
         </el-row>
 
-        <el-table :data="selectedSoftwareRows" size="small" border>
+        <el-row :gutter="12" class="software-picked-filter">
+          <el-col :span="24">
+            <el-input
+              v-model="pickedSoftwareKeyword"
+              clearable
+              placeholder="在已添加的软件中搜索（名称/分类/ID）"
+              prefix-icon="Search"
+            />
+          </el-col>
+        </el-row>
+
+        <el-table :data="filteredSelectedSoftwareRows" size="small" border>
           <el-table-column label="#" width="56" align="center">
             <template #default="scope">
               {{ scope.$index + 1 }}
@@ -275,6 +286,8 @@ const softwarePick = ref()
 const softwareOptions = ref([])
 const softwareSearchLoading = ref(false)
 const softwareMeta = ref({})
+
+const pickedSoftwareKeyword = ref('')
 const categoryOptions = ref([])
 const tagOptions = ref([])
 
@@ -365,6 +378,17 @@ const attachmentsValue = computed({
       form.attachments = null
     }
   }
+})
+
+const filteredSelectedSoftwareRows = computed(() => {
+  const q = String(pickedSoftwareKeyword.value || '').trim().toLowerCase()
+  if (!q) return selectedSoftwareRows.value
+  return (selectedSoftwareRows.value || []).filter((x) => {
+    const name = String(x?.softwareName || '').toLowerCase()
+    const cat = String(x?.categoryName || '').toLowerCase()
+    const id = String(x?.softwareId || '')
+    return name.includes(q) || cat.includes(q) || id.includes(q)
+  })
 })
 function splitTags(raw) {
   const s = String(raw || '')
