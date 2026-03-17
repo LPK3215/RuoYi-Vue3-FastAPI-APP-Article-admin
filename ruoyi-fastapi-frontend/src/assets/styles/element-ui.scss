@@ -1,0 +1,303 @@
+// cover some element-ui styles
+
+.el-breadcrumb__inner,
+.el-breadcrumb__inner a {
+  font-weight: 400 !important;
+}
+
+.el-upload {
+  input[type="file"] {
+    display: none !important;
+  }
+}
+
+.el-upload__input {
+  display: none;
+}
+
+.cell {
+  .el-tag {
+    margin-right: 0px;
+  }
+}
+
+.small-padding {
+  .cell {
+    padding-left: 5px;
+    padding-right: 5px;
+  }
+}
+
+.fixed-width {
+  .el-button--mini {
+    padding: 7px 10px;
+    width: 60px;
+  }
+}
+
+.status-col {
+  .cell {
+    padding: 0 10px;
+    text-align: center;
+
+    .el-tag {
+      margin-right: 0px;
+    }
+  }
+}
+
+// to fixed https://github.com/ElemeFE/element/issues/2461
+.el-dialog {
+  transform: none;
+  left: 0;
+  position: relative;
+  margin: 0 auto;
+}
+
+// refine element ui upload
+.upload-container {
+  .el-upload {
+    width: 100%;
+
+    .el-upload-dragger {
+      width: 100%;
+      height: 200px;
+    }
+  }
+}
+
+// dropdown
+.el-dropdown-menu {
+  a {
+    display: block
+  }
+}
+
+// fix date-picker ui bug in filter-item
+.el-range-editor.el-input__inner {
+  display: inline-flex !important;
+}
+
+// to fix el-date-picker css style
+.el-range-separator {
+  box-sizing: content-box;
+}
+
+.el-menu--collapse
+  > div
+  > .el-submenu
+  > .el-submenu__title
+  .el-submenu__icon-arrow {
+  display: none;
+}
+
+.el-dropdown .el-dropdown-link{
+  color: var(--el-color-primary) !important;
+}
+
+/* ---------------------------------------------
+   Select / Dropdown (Element Plus)
+   目标：暗黑模式下更“产品化”的下拉菜单（圆角/层次/hover/selected）
+---------------------------------------------- */
+
+/* Input (trigger) */
+.el-select,
+.el-tree-select {
+  .el-select__wrapper {
+    border-radius: 12px;
+    background: color-mix(in srgb, var(--app-surface) 88%, transparent);
+    box-shadow: 0 0 0 1px var(--app-border) inset;
+    transition: box-shadow 160ms ease, background 160ms ease;
+  }
+
+  .el-select__wrapper:hover,
+  .el-select__wrapper.is-hovering:not(.is-focused) {
+    box-shadow: 0 0 0 1px color-mix(in srgb, var(--el-color-primary) 26%, var(--app-border)) inset;
+  }
+
+  .el-select__wrapper.is-focused {
+    box-shadow:
+      0 0 0 1px color-mix(in srgb, var(--el-color-primary) 58%, var(--app-border)) inset,
+      0 0 0 4px color-mix(in srgb, var(--el-color-primary) 18%, transparent);
+    background: color-mix(in srgb, var(--app-surface) 94%, transparent);
+  }
+}
+
+/* Cascader / Autocomplete triggers: keep same "surface" language as Select */
+.el-cascader,
+.el-autocomplete {
+  .el-input__wrapper {
+    border-radius: 12px;
+    background: color-mix(in srgb, var(--app-surface) 88%, transparent);
+    box-shadow: 0 0 0 1px var(--app-border) inset;
+    transition: box-shadow 160ms ease, background 160ms ease;
+  }
+
+  .el-input__wrapper:hover {
+    box-shadow: 0 0 0 1px color-mix(in srgb, var(--el-color-primary) 26%, var(--app-border)) inset;
+  }
+
+  .el-input__wrapper:focus-within {
+    box-shadow:
+      0 0 0 1px color-mix(in srgb, var(--el-color-primary) 58%, var(--app-border)) inset,
+      0 0 0 4px color-mix(in srgb, var(--el-color-primary) 18%, transparent);
+    background: color-mix(in srgb, var(--app-surface) 94%, transparent);
+  }
+}
+
+/* Popper panel */
+.el-select__popper.el-popper,
+.el-tree-select__popper,
+.el-dropdown__popper.el-popper,
+.el-autocomplete__popper.el-popper,
+.el-cascader__dropdown.el-popper {
+  border: 1px solid var(--app-border) !important;
+  border-radius: 14px !important;
+  box-shadow: var(--app-shadow) !important;
+  background: var(--app-surface-2) !important;
+  overflow: hidden;
+
+  @supports ((-webkit-backdrop-filter: blur(10px)) or (backdrop-filter: blur(10px))) {
+    -webkit-backdrop-filter: blur(10px) saturate(1.15);
+    backdrop-filter: blur(10px) saturate(1.15);
+  }
+
+  /* arrow */
+  .el-popper__arrow:before {
+    border: 1px solid var(--app-border) !important;
+    background: var(--app-surface-2) !important;
+  }
+
+  /* Keep Element Plus' arrow "2-side border" logic (we use !important above) */
+  &[data-popper-placement^='top'] .el-popper__arrow:before {
+    border-left-color: transparent !important;
+    border-top-color: transparent !important;
+  }
+
+  &[data-popper-placement^='bottom'] .el-popper__arrow:before {
+    border-bottom-color: transparent !important;
+    border-right-color: transparent !important;
+  }
+
+  &[data-popper-placement^='left'] .el-popper__arrow:before {
+    border-bottom-color: transparent !important;
+    border-left-color: transparent !important;
+  }
+
+  &[data-popper-placement^='right'] .el-popper__arrow:before {
+    border-right-color: transparent !important;
+    border-top-color: transparent !important;
+  }
+}
+
+.el-select-dropdown {
+  border: none !important;
+  background: transparent !important;
+}
+
+.el-select-dropdown__wrap {
+  padding: 6px;
+}
+
+.el-select-dropdown__item {
+  border-radius: 10px;
+  padding: 0 12px;
+  height: 36px;
+  line-height: 36px;
+  color: var(--el-text-color-regular);
+  transition: background-color 150ms ease, color 150ms ease;
+}
+
+.el-select-dropdown__item.is-hovering,
+.el-select-dropdown__item:hover {
+  background-color: color-mix(in srgb, var(--el-color-primary) 12%, transparent) !important;
+  color: var(--el-text-color-primary) !important;
+}
+
+.el-select-dropdown__item.is-selected {
+  background-color: color-mix(in srgb, var(--el-color-primary) 18%, transparent) !important;
+  color: var(--el-color-primary) !important;
+  font-weight: 650 !important;
+}
+
+.el-select-dropdown__item.is-disabled {
+  opacity: 0.55;
+}
+
+/* Dropdown (el-dropdown) */
+.el-dropdown-menu {
+  border: none !important;
+  background: transparent !important;
+  padding: 6px !important;
+}
+
+.el-dropdown-menu--large {
+  padding: 7px !important;
+}
+
+.el-dropdown-menu--small {
+  padding: 4px !important;
+}
+
+.el-dropdown-menu__item {
+  border-radius: 10px;
+  padding: 0 12px !important;
+  height: 36px;
+  line-height: 36px;
+  color: var(--el-text-color-regular);
+  transition: background-color 150ms ease, color 150ms ease;
+}
+
+.el-dropdown-menu--large .el-dropdown-menu__item {
+  height: 40px;
+  line-height: 40px;
+}
+
+.el-dropdown-menu--small .el-dropdown-menu__item {
+  height: 32px;
+  line-height: 32px;
+}
+
+.el-dropdown-menu__item--divided {
+  border-top: 1px solid var(--app-border) !important;
+  margin: 6px 0 0 !important;
+  padding-top: 6px !important;
+}
+
+.el-dropdown-menu__item:not(.is-disabled):focus,
+.el-dropdown-menu__item:not(.is-disabled):hover {
+  background-color: color-mix(in srgb, var(--el-color-primary) 12%, transparent) !important;
+  color: var(--el-text-color-primary) !important;
+}
+
+/* Autocomplete suggestions */
+.el-autocomplete-suggestion {
+  border-radius: 14px;
+}
+
+.el-autocomplete-suggestion__wrap {
+  padding: 6px;
+}
+
+.el-autocomplete-suggestion li {
+  border-radius: 10px;
+  padding: 0 12px;
+  height: 36px;
+  line-height: 36px;
+  transition: background-color 150ms ease, color 150ms ease;
+}
+
+.el-autocomplete-suggestion li.highlighted,
+.el-autocomplete-suggestion li:hover {
+  background-color: color-mix(in srgb, var(--el-color-primary) 12%, transparent) !important;
+  color: var(--el-text-color-primary) !important;
+}
+
+.el-autocomplete-suggestion li.divider {
+  border-top-color: var(--app-border);
+}
+
+/* Cascader dropdown */
+.el-cascader__dropdown {
+  --el-cascader-node-background-hover: color-mix(in srgb, var(--el-color-primary) 10%, transparent);
+}

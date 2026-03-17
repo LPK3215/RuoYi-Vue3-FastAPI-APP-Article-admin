@@ -1,0 +1,6 @@
+playwright
+pytest
+pytest-asyncio
+pytest-playwright
+requests
+ruff
