@@ -7,6 +7,8 @@ import '@fontsource/ibm-plex-sans/600.css'
 import '@fontsource/ibm-plex-mono/400.css'
 import '@fontsource/ibm-plex-mono/500.css'
 import { BrowserRouter } from 'react-router-dom'
+import { ThemeProvider, applyTheme, resolveInitialTheme } from './theme/layout-system'
+import './theme/layout-system/layout-system.css'
 import './index.css'
 import App from './App.tsx'
 
@@ -20,12 +22,16 @@ const queryClient = new QueryClient({
   },
 })
 
+applyTheme(resolveInitialTheme())
+
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <QueryClientProvider client={queryClient}>
-      <BrowserRouter>
-        <App />
-      </BrowserRouter>
+      <ThemeProvider>
+        <BrowserRouter>
+          <App />
+        </BrowserRouter>
+      </ThemeProvider>
     </QueryClientProvider>
   </StrictMode>,
 )

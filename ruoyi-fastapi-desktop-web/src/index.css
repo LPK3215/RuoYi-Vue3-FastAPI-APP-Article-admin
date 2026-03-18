@@ -1,364 +1,3 @@
-:root {
-  --bg0: #070a0f;
-  --bg1: rgba(255, 255, 255, 0.04);
-  --card: rgba(14, 18, 26, 0.76);
-  --card2: rgba(12, 16, 24, 0.5);
-  --line: rgba(255, 255, 255, 0.08);
-  --line2: rgba(255, 255, 255, 0.14);
-  --text: rgba(229, 231, 235, 0.92);
-  --muted: rgba(229, 231, 235, 0.62);
-  --accent: #7cff6b;
-  --accent2: #3ea6ff;
-  --danger: #ff4d4f;
-  --shadow: rgba(0, 0, 0, 0.45) 0 18px 48px -16px;
-  --radius: 14px;
-  --radius-sm: 10px;
-  --sans: 'IBM Plex Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
-  --mono: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-
-  color-scheme: dark;
-  font-family: var(--sans);
-  font-size: 16px;
-  line-height: 1.5;
-  letter-spacing: 0.2px;
-  color: var(--text);
-  background: var(--bg0);
-  text-rendering: geometricPrecision;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
-*,
-*::before,
-*::after {
-  box-sizing: border-box;
-}
-
-html,
-body,
-#root {
-  height: 100%;
-}
-
-body {
-  margin: 0;
-  min-width: 1100px;
-  background:
-    radial-gradient(1200px 800px at 18% 10%, rgba(124, 255, 107, 0.12), transparent 62%),
-    radial-gradient(900px 700px at 76% 22%, rgba(62, 166, 255, 0.12), transparent 60%),
-    linear-gradient(to bottom, rgba(255, 255, 255, 0.035) 1px, transparent 1px),
-    linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
-    radial-gradient(600px 600px at 70% 85%, rgba(255, 255, 255, 0.05), transparent 62%),
-    var(--bg0);
-  background-size: auto, auto, 44px 44px, 44px 44px, auto, auto;
-}
-
-body::before {
-  content: '';
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  background: repeating-linear-gradient(
-    to bottom,
-    rgba(255, 255, 255, 0.028),
-    rgba(255, 255, 255, 0.028) 1px,
-    transparent 1px,
-    transparent 3px
-  );
-  mix-blend-mode: overlay;
-  opacity: 0.16;
-}
-
-/* Scrollbars (desktop) */
-.ds-main,
-.ds-tableWrap {
-  scrollbar-color: rgba(255, 255, 255, 0.18) transparent;
-  scrollbar-width: thin;
-}
-
-.ds-main::-webkit-scrollbar,
-.ds-tableWrap::-webkit-scrollbar {
-  width: 10px;
-  height: 10px;
-}
-
-.ds-main::-webkit-scrollbar-thumb,
-.ds-tableWrap::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.16);
-  border: 2px solid transparent;
-  border-radius: 999px;
-  background-clip: padding-box;
-}
-
-.ds-main::-webkit-scrollbar-thumb:hover,
-.ds-tableWrap::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.22);
-  background-clip: padding-box;
-}
-
-.ds-main::-webkit-scrollbar-track,
-.ds-tableWrap::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-a {
-  color: inherit;
-  text-decoration: none;
-}
-
-.ds-mono {
-  font-family: var(--mono);
-  font-variant-numeric: tabular-nums;
-}
-
-.ds-muted {
-  color: var(--muted);
-}
-
-.ds-link {
-  font: inherit;
-  background: transparent;
-  border: none;
-  padding: 0;
-  color: var(--accent2);
-  cursor: pointer;
-}
-
-.ds-link:focus-visible {
-  outline: 2px solid rgba(62, 166, 255, 0.6);
-  outline-offset: 3px;
-  border-radius: 8px;
-}
-
-.ds-brandLink {
-  color: inherit;
-  text-decoration: none;
-  border-radius: 14px;
-  transition: transform 140ms ease, background 140ms ease, border-color 140ms ease;
-}
-
-.ds-brandLink:hover {
-  transform: translateY(-1px);
-}
-
-.ds-brandLink:focus-visible {
-  outline: 2px solid rgba(62, 166, 255, 0.6);
-  outline-offset: 3px;
-}
-.ds-shell {
-  height: 100%;
-  display: grid;
-  grid-template-columns: 292px 1fr;
-}
-
-.ds-sidebar {
-  position: sticky;
-  top: 0;
-  height: 100%;
-  border-right: 1px solid var(--line);
-  background: linear-gradient(to bottom, rgba(255, 255, 255, 0.035), transparent 24%),
-    rgba(7, 10, 15, 0.82);
-  backdrop-filter: blur(12px);
-  display: flex;
-  flex-direction: column;
-  padding: 18px 14px 14px;
-  box-sizing: border-box;
-}
-
-.ds-brand {
-  display: flex;
-  gap: 12px;
-  align-items: center;
-  padding: 10px 10px 16px;
-}
-
-.ds-brand.ds-brandLink:hover {
-  background: rgba(255, 255, 255, 0.03);
-}
-
-
-.ds-brandMark {
-  width: 40px;
-  height: 40px;
-  border-radius: 12px;
-  background: linear-gradient(135deg, rgba(124, 255, 107, 0.22), rgba(62, 166, 255, 0.18));
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.35) inset, var(--shadow);
-  display: grid;
-  place-items: center;
-}
-
-.ds-brandMark > span {
-  width: 16px;
-  height: 16px;
-  border-radius: 6px;
-  background: radial-gradient(circle at 35% 35%, rgba(124, 255, 107, 0.9), rgba(62, 166, 255, 0.72));
-  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.14) inset, 0 10px 25px -12px rgba(124, 255, 107, 0.55);
-}
-
-.ds-brandTitle {
-  font-size: 14px;
-  font-weight: 600;
-  letter-spacing: 0.6px;
-  text-transform: uppercase;
-}
-
-.ds-brandSub {
-  margin-top: 2px;
-  font-size: 12px;
-  color: var(--muted);
-  font-family: var(--mono);
-}
-
-.ds-nav {
-  padding: 6px 10px;
-  display: flex;
-  flex-direction: column;
-  gap: 18px;
-}
-
-.ds-navGroupTitle {
-  font-size: 11px;
-  letter-spacing: 1.5px;
-  text-transform: uppercase;
-  color: rgba(229, 231, 235, 0.5);
-  font-family: var(--mono);
-  margin: 0 0 8px;
-}
-
-.ds-sideItem {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 10px;
-  padding: 10px 10px;
-  border-radius: 12px;
-  border: 1px solid transparent;
-  background: transparent;
-  color: rgba(229, 231, 235, 0.82);
-  transition: transform 140ms ease, border-color 140ms ease, background 140ms ease;
-}
-
-.ds-sideItem:hover {
-  transform: translateY(-1px);
-  border-color: rgba(255, 255, 255, 0.12);
-  background: rgba(255, 255, 255, 0.04);
-}
-
-.ds-sideItem:focus-visible {
-  outline: 2px solid rgba(124, 255, 107, 0.55);
-  outline-offset: 2px;
-}
-
-.ds-sideItem--active {
-  border-color: rgba(124, 255, 107, 0.35);
-  background: linear-gradient(90deg, rgba(124, 255, 107, 0.09), rgba(62, 166, 255, 0.06));
-  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.25) inset;
-}
-
-.ds-sideItemLabel {
-  font-weight: 520;
-}
-
-.ds-sideItemHint {
-  font-size: 11px;
-  color: rgba(229, 231, 235, 0.55);
-  font-family: var(--mono);
-}
-
-.ds-sideFooter {
-  margin-top: auto;
-  padding: 12px 10px 0;
-  border-top: 1px solid var(--line);
-  color: rgba(229, 231, 235, 0.6);
-  font-size: 12px;
-}
-
-.ds-sideFooterLine {
-  padding: 10px 0 0;
-}
-
-.ds-frame {
-  display: flex;
-  flex-direction: column;
-  min-width: 0;
-}
-
-.ds-topbar {
-  height: 64px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 18px;
-  border-bottom: 1px solid var(--line);
-  background: rgba(7, 10, 15, 0.6);
-  backdrop-filter: blur(10px);
-}
-
-.ds-topbarTitle {
-  font-size: 13px;
-  font-weight: 600;
-  letter-spacing: 1.2px;
-  text-transform: uppercase;
-  font-family: var(--mono);
-  text-wrap: balance;
-}
-
-.ds-topbarHint {
-  margin-top: 2px;
-  font-size: 12px;
-  color: rgba(229, 231, 235, 0.6);
-}
-
-.ds-topbarLeft {
-  display: flex;
-  flex-direction: column;
-}
-
-.ds-topbarLeft.ds-brandLink {
-  padding: 10px 12px;
-  margin: -10px -12px;
-}
-
-.ds-topbarLeft.ds-brandLink:hover {
-  background: rgba(255, 255, 255, 0.03);
-}
-.ds-topbarRight {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.ds-topbarUser {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 7px 10px;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.03);
-}
-
-.ds-topbarUserDot {
-  width: 8px;
-  height: 8px;
-  border-radius: 999px;
-  background: var(--accent);
-  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.25) inset, 0 0 18px rgba(124, 255, 107, 0.35);
-}
-
-.ds-topbarUserName {
-  font-size: 12px;
-  font-family: var(--mono);
-  color: rgba(229, 231, 235, 0.8);
-}
-
-.ds-main {
-  flex: 1;
-  min-height: 0;
-  overflow: auto;
-}
-
 .ds-pad {
   padding: 18px;
 }
@@ -381,9 +20,9 @@ a {
 }
 
 .ds-card {
-  background: linear-gradient(to bottom, rgba(255, 255, 255, 0.04), transparent 22%),
+  background: linear-gradient(to bottom, rgb(var(--rgb-base) / 0.04), transparent 22%),
     var(--card);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid rgb(var(--rgb-base) / 0.1);
   border-radius: var(--radius);
   box-shadow: var(--shadow);
   overflow: hidden;
@@ -407,7 +46,7 @@ a {
 .ds-cardSubtitle {
   margin-top: 3px;
   font-size: 12px;
-  color: rgba(229, 231, 235, 0.6);
+  color: rgb(var(--rgb-text) / 0.6);
   font-family: var(--mono);
 }
 
@@ -438,7 +77,7 @@ a {
 
 .ds-kvKey {
   font-size: 12px;
-  color: rgba(229, 231, 235, 0.6);
+  color: rgb(var(--rgb-text) / 0.6);
   font-family: var(--mono);
   text-transform: uppercase;
   letter-spacing: 0.8px;
@@ -463,7 +102,7 @@ a {
 
 .ds-nextDesc {
   margin-top: 2px;
-  color: rgba(229, 231, 235, 0.65);
+  color: rgb(var(--rgb-text) / 0.65);
   font-size: 13px;
 }
 
@@ -474,7 +113,7 @@ a {
   gap: 10px;
   align-items: end;
   border-bottom: 1px solid var(--line);
-  background: rgba(0, 0, 0, 0.12);
+  background: rgb(var(--rgb-ink) / 0.12);
 }
 
 .ds-filterActions {
@@ -489,7 +128,7 @@ a {
 
 .ds-label {
   font-size: 11px;
-  color: rgba(229, 231, 235, 0.58);
+  color: rgb(var(--rgb-text) / 0.58);
   letter-spacing: 1.1px;
   text-transform: uppercase;
   font-family: var(--mono);
@@ -500,9 +139,9 @@ a {
   height: 36px;
   padding: 0 10px;
   border-radius: 12px;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  background: rgba(255, 255, 255, 0.03);
-  color: rgba(229, 231, 235, 0.9);
+  border: 1px solid rgb(var(--rgb-base) / 0.12);
+  background: rgb(var(--rgb-base) / 0.03);
+  color: rgb(var(--rgb-text) / 0.9);
   outline: none;
   transition: border-color 140ms ease, box-shadow 140ms ease, background 140ms ease;
 }
@@ -524,12 +163,12 @@ a {
 
 /* Native <select> dropdown menu colors (legacy fallback) */
 .ds-select option {
-  background: #0b0f14;
-  color: rgba(229, 231, 235, 0.92);
+  background: rgb(var(--rgb-panel-3) / 1);
+  color: rgb(var(--rgb-text) / 0.92);
 }
 
 .ds-select option:disabled {
-  color: rgba(229, 231, 235, 0.45);
+  color: rgb(var(--rgb-text) / 0.45);
 }
 
 .ds-selectValue {
@@ -559,10 +198,10 @@ a {
   z-index: 9999;
   padding: 6px;
   border-radius: 14px;
-  border: 1px solid rgba(255, 255, 255, 0.14);
+  border: 1px solid rgb(var(--rgb-base) / 0.14);
   background:
-    linear-gradient(to bottom, rgba(255, 255, 255, 0.06), transparent 18%),
-    rgba(14, 18, 26, 0.94);
+    linear-gradient(to bottom, rgb(var(--rgb-base) / 0.06), transparent 18%),
+    rgb(var(--rgb-card-rgb) / 0.94);
   box-shadow: var(--shadow);
 }
 
@@ -578,7 +217,7 @@ a {
   gap: 4px;
   max-height: var(--ds-select-max-h, 320px);
   overflow: auto;
-  scrollbar-color: rgba(255, 255, 255, 0.18) transparent;
+  scrollbar-color: rgb(var(--rgb-base) / 0.18) transparent;
   scrollbar-width: thin;
 }
 
@@ -588,14 +227,14 @@ a {
 }
 
 .ds-selectMenu::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.16);
+  background: rgb(var(--rgb-base) / 0.16);
   border: 2px solid transparent;
   border-radius: 999px;
   background-clip: padding-box;
 }
 
 .ds-selectMenu::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.22);
+  background: rgb(var(--rgb-base) / 0.22);
   background-clip: padding-box;
 }
 
@@ -609,7 +248,7 @@ a {
   border-radius: 12px;
   border: 1px solid transparent;
   background: transparent;
-  color: rgba(229, 231, 235, 0.92);
+  color: rgb(var(--rgb-text) / 0.92);
   cursor: pointer;
   font: inherit;
   display: flex;
@@ -621,13 +260,13 @@ a {
 
 .ds-selectOption.is-active,
 .ds-selectOption:hover:not(:disabled) {
-  border-color: rgba(124, 255, 107, 0.22);
-  background: rgba(124, 255, 107, 0.08);
+  border-color: rgb(var(--rgb-accent) / 0.22);
+  background: rgb(var(--rgb-accent) / 0.08);
 }
 
 .ds-selectOption.is-selected {
-  border-color: rgba(124, 255, 107, 0.32);
-  background: linear-gradient(135deg, rgba(124, 255, 107, 0.18), rgba(62, 166, 255, 0.10));
+  border-color: rgb(var(--rgb-accent) / 0.32);
+  background: linear-gradient(135deg, rgb(var(--rgb-accent) / 0.18), rgb(var(--rgb-accent-2) / 0.10));
 }
 
 .ds-selectOption:disabled {
@@ -649,28 +288,28 @@ a {
 
 .ds-selectEmpty {
   padding: 10px 10px;
-  color: rgba(229, 231, 235, 0.62);
+  color: rgb(var(--rgb-text) / 0.62);
   font-size: 13px;
 }
 
 .ds-input:focus,
 .ds-select:focus {
-  border-color: rgba(124, 255, 107, 0.45);
-  background: rgba(255, 255, 255, 0.05);
+  border-color: rgb(var(--rgb-accent) / 0.45);
+  background: rgb(var(--rgb-base) / 0.05);
 }
 
 .ds-input:focus-visible,
 .ds-select:focus-visible {
-  box-shadow: 0 0 0 4px rgba(124, 255, 107, 0.14);
+  box-shadow: 0 0 0 4px rgb(var(--rgb-accent) / 0.14);
 }
 
 .ds-btn {
   height: 36px;
   padding: 0 12px;
   border-radius: 12px;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  background: rgba(255, 255, 255, 0.04);
-  color: rgba(229, 231, 235, 0.88);
+  border: 1px solid rgb(var(--rgb-base) / 0.12);
+  background: rgb(var(--rgb-base) / 0.04);
+  color: rgb(var(--rgb-text) / 0.88);
   cursor: pointer;
   transition: transform 140ms ease, background 140ms ease, border-color 140ms ease;
   font: inherit;
@@ -694,13 +333,13 @@ a {
 }
 
 .ds-btn--primary {
-  border-color: rgba(124, 255, 107, 0.45);
-  background: linear-gradient(135deg, rgba(124, 255, 107, 0.16), rgba(62, 166, 255, 0.10));
+  border-color: rgb(var(--rgb-accent) / 0.45);
+  background: linear-gradient(135deg, rgb(var(--rgb-accent) / 0.16), rgb(var(--rgb-accent-2) / 0.10));
 }
 
 .ds-btn--primary:hover:not(:disabled) {
   transform: translateY(-1px);
-  background: linear-gradient(135deg, rgba(124, 255, 107, 0.22), rgba(62, 166, 255, 0.14));
+  background: linear-gradient(135deg, rgb(var(--rgb-accent) / 0.22), rgb(var(--rgb-accent-2) / 0.14));
 }
 
 .ds-btn--ghost {
@@ -708,16 +347,16 @@ a {
 }
 
 .ds-btn--ghost:hover:not(:disabled) {
-  background: rgba(255, 255, 255, 0.05);
+  background: rgb(var(--rgb-base) / 0.05);
 }
 
 .ds-btn--danger {
-  border-color: rgba(255, 77, 79, 0.5);
-  background: rgba(255, 77, 79, 0.12);
+  border-color: rgb(var(--rgb-danger) / 0.5);
+  background: rgb(var(--rgb-danger) / 0.12);
 }
 
 .ds-btn:focus-visible {
-  outline: 2px solid rgba(124, 255, 107, 0.55);
+  outline: 2px solid rgb(var(--rgb-accent) / 0.55);
   outline-offset: 2px;
 }
 
@@ -731,14 +370,14 @@ a {
   width: 14px;
   height: 14px;
   border-radius: 999px;
-  border: 2px solid rgba(255, 255, 255, 0.18);
-  border-top-color: rgba(124, 255, 107, 0.85);
+  border: 2px solid rgb(var(--rgb-base) / 0.18);
+  border-top-color: rgb(var(--rgb-accent) / 0.85);
   animation: ds-spin 900ms linear infinite;
 }
 
 .ds-spinnerLabel {
   font-size: 13px;
-  color: rgba(229, 231, 235, 0.7);
+  color: rgb(var(--rgb-text) / 0.7);
 }
 
 @keyframes ds-spin {
@@ -750,20 +389,20 @@ a {
 .ds-alert {
   padding: 10px 12px;
   border-radius: 12px;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  background: rgba(255, 255, 255, 0.04);
-  color: rgba(229, 231, 235, 0.86);
+  border: 1px solid rgb(var(--rgb-base) / 0.12);
+  background: rgb(var(--rgb-base) / 0.04);
+  color: rgb(var(--rgb-text) / 0.86);
   font-size: 13px;
 }
 
 .ds-alert--error {
-  border-color: rgba(255, 77, 79, 0.45);
-  background: rgba(255, 77, 79, 0.08);
+  border-color: rgb(var(--rgb-danger) / 0.45);
+  background: rgb(var(--rgb-danger) / 0.08);
 }
 
 .ds-errorCard {
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgb(var(--rgb-base) / 0.12);
+  background: rgb(var(--rgb-base) / 0.03);
   border-radius: var(--radius);
   padding: 14px 16px;
 }
@@ -774,7 +413,7 @@ a {
 
 .ds-errorText {
   margin-top: 6px;
-  color: rgba(229, 231, 235, 0.65);
+  color: rgb(var(--rgb-text) / 0.65);
   font-size: 13px;
 }
 
@@ -797,13 +436,13 @@ a {
   position: sticky;
   top: 0;
   z-index: 1;
-  background: rgba(7, 10, 15, 0.92);
+  background: rgb(var(--rgb-bg) / 0.92);
   backdrop-filter: blur(10px);
   border-bottom: 1px solid var(--line);
   text-align: left;
   padding: 10px 12px;
   font-size: 12px;
-  color: rgba(229, 231, 235, 0.72);
+  color: rgb(var(--rgb-text) / 0.72);
   font-family: var(--mono);
   text-transform: uppercase;
   letter-spacing: 1px;
@@ -828,7 +467,7 @@ a {
 }
 
 .ds-thBtn:focus-visible {
-  outline: 2px solid rgba(62, 166, 255, 0.55);
+  outline: 2px solid rgb(var(--rgb-accent-2) / 0.55);
   outline-offset: 2px;
   border-radius: 10px;
 }
@@ -843,24 +482,24 @@ a {
 
 .ds-table td {
   padding: 11px 12px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-  color: rgba(229, 231, 235, 0.86);
+  border-bottom: 1px solid rgb(var(--rgb-base) / 0.06);
+  color: rgb(var(--rgb-text) / 0.86);
   font-size: 13px;
 }
 
 .ds-tr--clickable:hover td {
-  background: rgba(124, 255, 107, 0.04);
+  background: rgb(var(--rgb-accent) / 0.04);
 }
 
 .ds-tr--clickable:focus-visible {
-  outline: 2px solid rgba(62, 166, 255, 0.55);
+  outline: 2px solid rgb(var(--rgb-accent-2) / 0.55);
   outline-offset: -2px;
 }
 
 .ds-tdEmpty {
   padding: 26px 12px;
   text-align: center;
-  color: rgba(229, 231, 235, 0.6);
+  color: rgb(var(--rgb-text) / 0.6);
 }
 
 .ds-tableFooter {
@@ -885,7 +524,7 @@ a {
   min-width: 70px;
   text-align: center;
   font-size: 13px;
-  color: rgba(229, 231, 235, 0.75);
+  color: rgb(var(--rgb-text) / 0.75);
 }
 
 .ds-pill {
@@ -894,26 +533,26 @@ a {
   height: 22px;
   padding: 0 8px;
   border-radius: 999px;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgb(var(--rgb-base) / 0.12);
+  background: rgb(var(--rgb-base) / 0.03);
   font-size: 12px;
   font-family: var(--mono);
 }
 
 .ds-pill--ok {
-  border-color: rgba(124, 255, 107, 0.45);
-  background: rgba(124, 255, 107, 0.08);
-  color: rgba(210, 255, 205, 0.95);
+  border-color: rgb(var(--rgb-accent) / 0.45);
+  background: rgb(var(--rgb-accent) / 0.08);
+  color: rgb(var(--rgb-accent-soft) / 0.95);
 }
 
 .ds-pill--muted {
-  border-color: rgba(255, 255, 255, 0.16);
-  background: rgba(255, 255, 255, 0.04);
-  color: rgba(229, 231, 235, 0.76);
+  border-color: rgb(var(--rgb-base) / 0.16);
+  background: rgb(var(--rgb-base) / 0.04);
+  color: rgb(var(--rgb-text) / 0.76);
 }
 
 .ds-pill--neutral {
-  color: rgba(229, 231, 235, 0.7);
+  color: rgb(var(--rgb-text) / 0.7);
 }
 
 .ds-detailCard {
@@ -927,7 +566,7 @@ a {
   font-size: 12px;
   line-height: 1.5;
   font-family: var(--mono);
-  color: rgba(229, 231, 235, 0.82);
+  color: rgb(var(--rgb-text) / 0.82);
   white-space: pre-wrap;
   word-break: break-word;
 }
@@ -943,7 +582,7 @@ a {
 .ds-emptyText {
   margin-top: 6px;
   font-size: 13px;
-  color: rgba(229, 231, 235, 0.65);
+  color: rgb(var(--rgb-text) / 0.65);
 }
 
 .ds-login {
@@ -957,17 +596,17 @@ a {
 }
 
 .ds-loginCard {
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  border: 1px solid rgb(var(--rgb-base) / 0.12);
   border-radius: 18px;
-  background: linear-gradient(to bottom, rgba(255, 255, 255, 0.06), transparent 18%),
-    rgba(10, 14, 20, 0.86);
+  background: linear-gradient(to bottom, rgb(var(--rgb-base) / 0.06), transparent 18%),
+    rgb(var(--rgb-panel) / 0.86);
   box-shadow: var(--shadow);
   padding: 18px 18px 16px;
 }
 
 .ds-loginHeader {
   padding: 6px 2px 12px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.10);
+  border-bottom: 1px solid rgb(var(--rgb-base) / 0.10);
 }
 
 .ds-loginTitle {
@@ -982,7 +621,7 @@ a {
 .ds-loginSubtitle {
   margin-top: 4px;
   font-size: 13px;
-  color: rgba(229, 231, 235, 0.65);
+  color: rgb(var(--rgb-text) / 0.65);
 }
 
 .ds-loginForm {
@@ -1001,14 +640,14 @@ a {
 .ds-captchaImgBtn {
   height: 58px;
   border-radius: 12px;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgb(var(--rgb-base) / 0.12);
+  background: rgb(var(--rgb-base) / 0.03);
   overflow: hidden;
   cursor: pointer;
 }
 
 .ds-captchaImgBtn:focus-visible {
-  outline: 2px solid rgba(124, 255, 107, 0.55);
+  outline: 2px solid rgb(var(--rgb-accent) / 0.55);
   outline-offset: 2px;
 }
 
@@ -1036,7 +675,7 @@ a {
   display: grid;
   place-items: center;
   height: 100%;
-  color: rgba(229, 231, 235, 0.65);
+  color: rgb(var(--rgb-text) / 0.65);
   font-size: 12px;
   font-family: var(--mono);
 }
@@ -1046,7 +685,7 @@ a {
   align-items: center;
   gap: 10px;
   font-size: 13px;
-  color: rgba(229, 231, 235, 0.8);
+  color: rgb(var(--rgb-text) / 0.8);
 }
 
 .ds-loginSubmit {
@@ -1057,11 +696,11 @@ a {
 .ds-loginMeta {
   margin-top: 14px;
   padding-top: 12px;
-  border-top: 1px solid rgba(255, 255, 255, 0.10);
+  border-top: 1px solid rgb(var(--rgb-base) / 0.10);
   display: grid;
   gap: 6px;
   font-size: 12px;
-  color: rgba(229, 231, 235, 0.65);
+  color: rgb(var(--rgb-text) / 0.65);
 }
 
 .ds-loginAside {
@@ -1069,9 +708,9 @@ a {
 }
 
 .ds-loginAsideCard {
-  border: 1px solid rgba(255, 255, 255, 0.10);
+  border: 1px solid rgb(var(--rgb-base) / 0.10);
   border-radius: 18px;
-  background: rgba(10, 14, 20, 0.5);
+  background: rgb(var(--rgb-panel) / 0.5);
   padding: 18px;
 }
 
@@ -1080,13 +719,13 @@ a {
   letter-spacing: 1.2px;
   text-transform: uppercase;
   font-family: var(--mono);
-  color: rgba(229, 231, 235, 0.72);
+  color: rgb(var(--rgb-text) / 0.72);
 }
 
 .ds-loginAsideList {
   margin: 12px 0 0;
   padding-left: 16px;
-  color: rgba(229, 231, 235, 0.7);
+  color: rgb(var(--rgb-text) / 0.7);
   font-size: 13px;
   display: grid;
   gap: 8px;
@@ -1095,86 +734,6 @@ a {
 /* =======================
    Portal (DeskOps)
    ======================= */
-
-.ds-portal {
-  min-height: 100%;
-  display: flex;
-  flex-direction: column;
-}
-
-.ds-portalHeader {
-  position: sticky;
-  top: 0;
-  z-index: 20;
-  padding: 14px 18px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  border-bottom: 1px solid var(--line);
-  background: rgba(7, 10, 15, 0.72);
-  backdrop-filter: blur(12px);
-}
-
-.ds-portalBrand {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  min-width: 0;
-}
-
-.ds-portalBrand.ds-brandLink {
-  padding: 8px 10px;
-  margin: -8px -10px;
-}
-
-.ds-portalBrand.ds-brandLink:hover {
-  background: rgba(255, 255, 255, 0.03);
-}
-
-
-.ds-portalBrandText {
-  min-width: 0;
-}
-
-.ds-portalBrandTitle {
-  font-weight: 700;
-  letter-spacing: 0.35px;
-  text-wrap: balance;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.ds-portalBrandSub {
-  margin-top: 2px;
-  font-size: 12px;
-  color: rgba(229, 231, 235, 0.62);
-  font-family: var(--mono);
-}
-
-.ds-portalHeaderRight {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.ds-portalNav {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.ds-portalHeaderHint {
-  color: rgba(229, 231, 235, 0.62);
-  font-size: 12px;
-  font-family: var(--mono);
-}
-
-.ds-portalMain {
-  flex: 1;
-  min-height: 0;
-}
 
 .ds-portalPad {
   width: 100%;
@@ -1186,11 +745,11 @@ a {
 
 .ds-portalHero {
   border-radius: 26px;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  background: linear-gradient(135deg, rgba(124, 255, 107, 0.08), rgba(62, 166, 255, 0.05)),
-    radial-gradient(800px 420px at 15% 15%, rgba(124, 255, 107, 0.12), transparent 55%),
-    radial-gradient(900px 460px at 90% 20%, rgba(62, 166, 255, 0.10), transparent 62%),
-    rgba(10, 14, 20, 0.88);
+  border: 1px solid rgb(var(--rgb-base) / 0.12);
+  background: linear-gradient(135deg, rgb(var(--rgb-accent) / var(--hero-accent-wash-opacity)), rgb(var(--rgb-accent-2) / var(--hero-accent-wash-secondary-opacity))),
+    radial-gradient(800px 420px at 15% 15%, rgb(var(--rgb-accent) / var(--hero-glow-accent-opacity)), transparent 55%),
+    radial-gradient(900px 460px at 90% 20%, rgb(var(--rgb-accent-2) / var(--hero-glow-accent-secondary-opacity)), transparent 62%),
+    rgb(var(--rgb-panel) / 0.88);
   box-shadow: var(--shadow);
   overflow: hidden;
   position: relative;
@@ -1210,7 +769,7 @@ a {
   font-size: 12px;
   letter-spacing: 1.8px;
   text-transform: uppercase;
-  color: rgba(229, 231, 235, 0.7);
+  color: rgb(var(--rgb-text) / 0.7);
 }
 
 .ds-portalTitle {
@@ -1225,7 +784,7 @@ a {
 .ds-portalLead {
   margin-top: 10px;
   max-width: 56ch;
-  color: rgba(229, 231, 235, 0.72);
+  color: rgb(var(--rgb-text) / 0.72);
   font-size: 14px;
 }
 
@@ -1272,8 +831,8 @@ a {
 
 .ds-portalStat {
   border-radius: 16px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  background: rgba(0, 0, 0, 0.18);
+  border: 1px solid rgb(var(--rgb-base) / 0.1);
+  background: rgb(var(--rgb-ink) / 0.18);
   padding: 10px 12px;
 }
 
@@ -1281,7 +840,7 @@ a {
   font-size: 11px;
   letter-spacing: 1.4px;
   text-transform: uppercase;
-  color: rgba(229, 231, 235, 0.6);
+  color: rgb(var(--rgb-text) / 0.6);
   font-family: var(--mono);
 }
 
@@ -1294,8 +853,8 @@ a {
 .ds-portalHeroArt {
   position: relative;
   border-radius: 20px;
-  border: 1px solid rgba(255, 255, 255, 0.10);
-  background: rgba(0, 0, 0, 0.16);
+  border: 1px solid rgb(var(--rgb-base) / 0.10);
+  background: rgb(var(--rgb-ink) / 0.16);
   overflow: hidden;
 }
 
@@ -1305,10 +864,10 @@ a {
   width: 520px;
   height: 520px;
   border-radius: 50%;
-  background: radial-gradient(circle at 30% 30%, rgba(124, 255, 107, 0.62), transparent 55%),
-    radial-gradient(circle at 70% 55%, rgba(62, 166, 255, 0.58), transparent 60%);
+  background: radial-gradient(circle at 30% 30%, rgb(var(--rgb-accent) / 0.62), transparent 55%),
+    radial-gradient(circle at 70% 55%, rgb(var(--rgb-accent-2) / 0.58), transparent 60%);
   filter: blur(6px);
-  opacity: 0.75;
+  opacity: var(--hero-orb-opacity);
   transform: rotate(12deg);
 }
 
@@ -1316,11 +875,11 @@ a {
   position: absolute;
   inset: 0;
   background:
-    linear-gradient(to right, rgba(255, 255, 255, 0.04) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
+    linear-gradient(to right, rgb(var(--rgb-base) / 0.04) 1px, transparent 1px),
+    linear-gradient(to bottom, rgb(var(--rgb-base) / 0.035) 1px, transparent 1px);
   background-size: 44px 44px;
   mask-image: radial-gradient(circle at 40% 30%, black 30%, transparent 74%);
-  opacity: 0.9;
+  opacity: var(--hero-grid-opacity);
 }
 
 .ds-portalGrid {
@@ -1356,9 +915,9 @@ a {
   gap: 10px;
   padding: 10px 10px;
   border-radius: 14px;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  background: rgba(255, 255, 255, 0.02);
-  color: rgba(229, 231, 235, 0.84);
+  border: 1px solid rgb(var(--rgb-base) / 0.08);
+  background: rgb(var(--rgb-base) / 0.02);
+  color: rgb(var(--rgb-text) / 0.84);
   cursor: pointer;
   transition: transform 140ms ease, background 140ms ease, border-color 140ms ease;
   text-align: left;
@@ -1366,23 +925,23 @@ a {
 
 .ds-catItem:hover {
   transform: translateY(-1px);
-  background: rgba(255, 255, 255, 0.04);
-  border-color: rgba(255, 255, 255, 0.12);
+  background: rgb(var(--rgb-base) / 0.04);
+  border-color: rgb(var(--rgb-base) / 0.12);
 }
 
 .ds-catItem:focus-visible {
-  outline: 2px solid rgba(62, 166, 255, 0.55);
+  outline: 2px solid rgb(var(--rgb-accent-2) / 0.55);
   outline-offset: 2px;
 }
 
 .ds-catItem--active {
-  border-color: rgba(124, 255, 107, 0.35);
-  background: linear-gradient(90deg, rgba(124, 255, 107, 0.08), rgba(62, 166, 255, 0.05));
+  border-color: rgb(var(--rgb-accent) / 0.35);
+  background: linear-gradient(90deg, rgb(var(--rgb-accent) / 0.08), rgb(var(--rgb-accent-2) / 0.05));
 }
 
 .ds-catCount {
   font-size: 12px;
-  color: rgba(229, 231, 235, 0.68);
+  color: rgb(var(--rgb-text) / 0.68);
 }
 
 .ds-portalAsideCard .ds-cardHeader {
@@ -1407,7 +966,7 @@ a {
   letter-spacing: 1.2px;
   text-transform: uppercase;
   font-family: var(--mono);
-  color: rgba(229, 231, 235, 0.58);
+  color: rgb(var(--rgb-text) / 0.58);
 }
 
 .ds-portalFieldControls {
@@ -1421,7 +980,7 @@ a {
   letter-spacing: 1.2px;
   text-transform: uppercase;
   font-family: var(--mono);
-  color: rgba(229, 231, 235, 0.58);
+  color: rgb(var(--rgb-text) / 0.58);
 }
 
 .ds-portalTagsGrid {
@@ -1467,7 +1026,7 @@ a {
 .ds-portalToolbarSubtitle {
   margin-top: 2px;
   font-size: 12px;
-  color: rgba(229, 231, 235, 0.62);
+  color: rgb(var(--rgb-text) / 0.62);
 }
 
 .ds-portalToolbarRight {
@@ -1481,9 +1040,9 @@ a {
 }
 
 .ds-portalEmpty {
-  border: 1px dashed rgba(255, 255, 255, 0.14);
+  border: 1px dashed rgb(var(--rgb-base) / 0.14);
   border-radius: 18px;
-  background: rgba(0, 0, 0, 0.12);
+  background: rgb(var(--rgb-ink) / 0.12);
   padding: 20px 16px;
 }
 
@@ -1495,9 +1054,9 @@ a {
   height: 32px;
   padding: 0 10px;
   border-radius: 999px;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  background: rgba(255, 255, 255, 0.03);
-  color: rgba(229, 231, 235, 0.86);
+  border: 1px solid rgb(var(--rgb-base) / 0.12);
+  background: rgb(var(--rgb-base) / 0.03);
+  color: rgb(var(--rgb-text) / 0.86);
   font: inherit;
   cursor: pointer;
   transition: transform 140ms ease, background 140ms ease, border-color 140ms ease;
@@ -1505,11 +1064,11 @@ a {
 
 .ds-chip:hover:not(:disabled) {
   transform: translateY(-1px);
-  background: rgba(255, 255, 255, 0.05);
+  background: rgb(var(--rgb-base) / 0.05);
 }
 
 .ds-chip:focus-visible {
-  outline: 2px solid rgba(62, 166, 255, 0.55);
+  outline: 2px solid rgb(var(--rgb-accent-2) / 0.55);
   outline-offset: 2px;
 }
 
@@ -1531,28 +1090,28 @@ a {
 }
 
 .ds-chip--neutral {
-  background: rgba(255, 255, 255, 0.03);
+  background: rgb(var(--rgb-base) / 0.03);
 }
 
 .ds-chip--muted {
-  background: rgba(255, 255, 255, 0.02);
-  border-color: rgba(255, 255, 255, 0.1);
-  color: rgba(229, 231, 235, 0.82);
+  background: rgb(var(--rgb-base) / 0.02);
+  border-color: rgb(var(--rgb-base) / 0.1);
+  color: rgb(var(--rgb-text) / 0.82);
 }
 
 .ds-chip--accent {
-  border-color: rgba(124, 255, 107, 0.35);
-  background: rgba(124, 255, 107, 0.06);
+  border-color: rgb(var(--rgb-accent) / 0.35);
+  background: rgb(var(--rgb-accent) / 0.06);
 }
 
 .ds-chip--danger {
-  border-color: rgba(255, 77, 79, 0.45);
-  background: rgba(255, 77, 79, 0.08);
+  border-color: rgb(var(--rgb-danger) / 0.45);
+  background: rgb(var(--rgb-danger) / 0.08);
 }
 
 .ds-chip--selected {
-  border-color: rgba(62, 166, 255, 0.48);
-  background: rgba(62, 166, 255, 0.08);
+  border-color: rgb(var(--rgb-accent-2) / 0.48);
+  background: rgb(var(--rgb-accent-2) / 0.08);
 }
 
 .ds-chip--static {
@@ -1568,10 +1127,10 @@ a {
 }
 
 .ds-softCard {
-  border: 1px solid rgba(255, 255, 255, 0.10);
+  border: 1px solid rgb(var(--rgb-base) / 0.10);
   border-radius: 20px;
-  background: linear-gradient(to bottom, rgba(255, 255, 255, 0.04), transparent 20%),
-    rgba(10, 14, 20, 0.74);
+  background: linear-gradient(to bottom, rgb(var(--rgb-base) / 0.04), transparent 20%),
+    rgb(var(--rgb-panel) / 0.74);
   box-shadow: var(--shadow);
   padding: 14px 14px 12px;
   display: grid;
@@ -1583,13 +1142,13 @@ a {
 
 .ds-softCard:hover {
   transform: translateY(-2px);
-  border-color: rgba(124, 255, 107, 0.22);
-  background: linear-gradient(to bottom, rgba(255, 255, 255, 0.05), transparent 20%),
-    rgba(10, 14, 20, 0.82);
+  border-color: rgb(var(--rgb-accent) / 0.22);
+  background: linear-gradient(to bottom, rgb(var(--rgb-base) / 0.05), transparent 20%),
+    rgb(var(--rgb-panel) / 0.82);
 }
 
 .ds-softCard:focus-visible {
-  outline: 2px solid rgba(124, 255, 107, 0.55);
+  outline: 2px solid rgb(var(--rgb-accent) / 0.55);
   outline-offset: 2px;
 }
 
@@ -1605,12 +1164,12 @@ a {
   width: 44px;
   height: 44px;
   border-radius: 14px;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgb(var(--rgb-base) / 0.12);
+  background: rgb(var(--rgb-base) / 0.03);
   display: grid;
   place-items: center;
   overflow: hidden;
-  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.25) inset;
+  box-shadow: 0 0 0 1px rgb(var(--rgb-ink) / 0.25) inset;
 }
 
 .ds-softIcon img {
@@ -1624,8 +1183,8 @@ a {
   width: 18px;
   height: 18px;
   border-radius: 7px;
-  background: radial-gradient(circle at 35% 35%, rgba(124, 255, 107, 0.85), rgba(62, 166, 255, 0.65));
-  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.14) inset, 0 14px 24px -16px rgba(124, 255, 107, 0.55);
+  background: radial-gradient(circle at 35% 35%, rgb(var(--rgb-accent) / 0.85), rgb(var(--rgb-accent-2) / 0.65));
+  box-shadow: 0 0 0 1px rgb(var(--rgb-base) / 0.14) inset, 0 14px 24px -16px rgb(var(--rgb-accent) / 0.55);
 }
 
 .ds-softMeta {
@@ -1646,7 +1205,7 @@ a {
 .ds-softSub {
   margin-top: 4px;
   font-size: 12px;
-  color: rgba(229, 231, 235, 0.66);
+  color: rgb(var(--rgb-text) / 0.66);
   display: flex;
   align-items: center;
   gap: 8px;
@@ -1657,7 +1216,7 @@ a {
   width: 4px;
   height: 4px;
   border-radius: 999px;
-  background: rgba(229, 231, 235, 0.35);
+  background: rgb(var(--rgb-text) / 0.35);
 }
 
 .ds-softLicense {
@@ -1671,7 +1230,7 @@ a {
 }
 
 .ds-softDesc {
-  color: rgba(229, 231, 235, 0.78);
+  color: rgb(var(--rgb-text) / 0.78);
   font-size: 13px;
   line-height: 1.45;
   display: -webkit-box;
@@ -1697,7 +1256,7 @@ a {
 
 .ds-softTime {
   font-size: 12px;
-  color: rgba(229, 231, 235, 0.55);
+  color: rgb(var(--rgb-text) / 0.55);
   white-space: nowrap;
 }
 
@@ -1738,10 +1297,10 @@ a {
 }
 
 .ds-detailHero {
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  border: 1px solid rgb(var(--rgb-base) / 0.12);
   border-radius: 26px;
-  background: linear-gradient(to bottom, rgba(255, 255, 255, 0.05), transparent 22%),
-    rgba(10, 14, 20, 0.82);
+  background: linear-gradient(to bottom, rgb(var(--rgb-base) / 0.05), transparent 22%),
+    rgb(var(--rgb-panel) / 0.82);
   box-shadow: var(--shadow);
   padding: 16px 16px 14px;
   display: grid;
@@ -1760,8 +1319,8 @@ a {
   width: 62px;
   height: 62px;
   border-radius: 18px;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgb(var(--rgb-base) / 0.12);
+  background: rgb(var(--rgb-base) / 0.03);
   display: grid;
   place-items: center;
   overflow: hidden;
@@ -1787,7 +1346,7 @@ a {
 
 .ds-detailSub {
   margin-top: 6px;
-  color: rgba(229, 231, 235, 0.72);
+  color: rgb(var(--rgb-text) / 0.72);
   font-size: 14px;
 }
 
@@ -1800,7 +1359,7 @@ a {
 }
 
 .ds-detailHeroRight {
-  border-left: 1px solid rgba(255, 255, 255, 0.08);
+  border-left: 1px solid rgb(var(--rgb-base) / 0.08);
   padding-left: 14px;
   display: flex;
   align-items: center;
@@ -1861,7 +1420,7 @@ a {
 
 .ds-detailDownloadVersion {
   font-size: 12px;
-  color: rgba(229, 231, 235, 0.72);
+  color: rgb(var(--rgb-text) / 0.72);
 }
 
 .ds-detailDownloadRight {
@@ -1878,8 +1437,8 @@ a {
   gap: 4px;
   padding: 10px 10px;
   border-radius: 14px;
-  border: 1px solid rgba(255, 255, 255, 0.10);
-  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgb(var(--rgb-base) / 0.10);
+  background: rgb(var(--rgb-base) / 0.02);
   color: inherit;
   text-decoration: none;
   transition: transform 140ms ease, border-color 140ms ease, background 140ms ease;
@@ -1887,12 +1446,12 @@ a {
 
 .ds-detailResource:hover {
   transform: translateY(-1px);
-  border-color: rgba(62, 166, 255, 0.28);
-  background: rgba(255, 255, 255, 0.04);
+  border-color: rgb(var(--rgb-accent-2) / 0.28);
+  background: rgb(var(--rgb-base) / 0.04);
 }
 
 .ds-detailResource:focus-visible {
-  outline: 2px solid rgba(62, 166, 255, 0.55);
+  outline: 2px solid rgb(var(--rgb-accent-2) / 0.55);
   outline-offset: 2px;
 }
 
@@ -1902,7 +1461,7 @@ a {
 
 .ds-detailResourceUrl {
   font-size: 12px;
-  color: rgba(229, 231, 235, 0.62);
+  color: rgb(var(--rgb-text) / 0.62);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -1910,7 +1469,7 @@ a {
 
 /* Markdown */
 .ds-md {
-  color: rgba(229, 231, 235, 0.86);
+  color: rgb(var(--rgb-text) / 0.86);
   font-size: 14px;
   line-height: 1.7;
 }
@@ -1940,7 +1499,7 @@ a {
 }
 
 .ds-md a {
-  color: rgba(62, 166, 255, 0.92);
+  color: rgb(var(--rgb-accent-2) / 0.92);
   text-decoration: underline;
   text-underline-offset: 3px;
 }
@@ -1948,8 +1507,8 @@ a {
 .ds-md code {
   font-family: var(--mono);
   font-size: 12.5px;
-  background: rgba(0, 0, 0, 0.22);
-  border: 1px solid rgba(255, 255, 255, 0.10);
+  background: rgb(var(--rgb-ink) / 0.22);
+  border: 1px solid rgb(var(--rgb-base) / 0.10);
   border-radius: 10px;
   padding: 2px 6px;
 }
@@ -1958,8 +1517,8 @@ a {
   margin: 12px 0;
   padding: 12px 12px;
   border-radius: 16px;
-  border: 1px solid rgba(255, 255, 255, 0.10);
-  background: rgba(0, 0, 0, 0.22);
+  border: 1px solid rgb(var(--rgb-base) / 0.10);
+  background: rgb(var(--rgb-ink) / 0.22);
   overflow: auto;
 }
 
@@ -1973,10 +1532,10 @@ a {
 .ds-md blockquote {
   margin: 12px 0;
   padding: 10px 12px;
-  border-left: 3px solid rgba(124, 255, 107, 0.35);
-  background: rgba(124, 255, 107, 0.05);
+  border-left: 3px solid rgb(var(--rgb-accent) / 0.35);
+  background: rgb(var(--rgb-accent) / 0.05);
   border-radius: 12px;
-  color: rgba(229, 231, 235, 0.8);
+  color: rgb(var(--rgb-text) / 0.8);
 }
 
 .ds-md ul,
@@ -1998,7 +1557,7 @@ a {
 
 .ds-md th,
 .ds-md td {
-  border: 1px solid rgba(255, 255, 255, 0.10);
+  border: 1px solid rgb(var(--rgb-base) / 0.10);
   padding: 8px 10px;
   vertical-align: top;
 }
@@ -2008,9 +1567,10 @@ a {
   text-transform: uppercase;
   letter-spacing: 1px;
   font-size: 12px;
-  color: rgba(229, 231, 235, 0.72);
-  background: rgba(0, 0, 0, 0.16);
+  color: rgb(var(--rgb-text) / 0.72);
+  background: rgb(var(--rgb-ink) / 0.16);
 }
+
 
 
 

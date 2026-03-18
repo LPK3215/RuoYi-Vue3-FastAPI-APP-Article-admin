@@ -1,4 +1,5 @@
 import clsx from 'clsx'
+import { ThemeSwitcher } from '@/theme/layout-system'
 import { Link, NavLink, Outlet } from 'react-router-dom'
 
 export function PortalLayout() {
@@ -37,6 +38,7 @@ export function PortalLayout() {
               教程
             </NavLink>
           </nav>
+          <ThemeSwitcher />
           <div className="ds-portalHeaderHint">支持搜索与筛选 · 打开即用</div>
         </div>
       </header>

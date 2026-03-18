@@ -1,4 +1,5 @@
 import { Button } from '@/ui/Button'
+import { ThemeSwitcher } from '@/theme/layout-system'
 import { Link } from 'react-router-dom'
 
 export function Topbar(props: { userName?: string; onLogout: () => void }) {
@@ -9,6 +10,7 @@ export function Topbar(props: { userName?: string; onLogout: () => void }) {
         <div className="ds-topbarHint">系统概览与账号管理</div>
       </Link>
       <div className="ds-topbarRight">
+        <ThemeSwitcher />
         <div className="ds-topbarUser">
           <span className="ds-topbarUserDot" aria-hidden="true" />
           <span className="ds-topbarUserName">{props.userName || '—'}</span>

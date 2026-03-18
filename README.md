@@ -4,6 +4,7 @@
 
 - 后端 API：`ruoyi-fastapi-backend`
 - 管理后台：`ruoyi-fastapi-frontend`
+- 后台样式模板：`ruoyi-admin-style-template`
 - Portal Web：`ruoyi-fastapi-desktop-web`
 - uni-app 客户端：`ruoyi-fastapi-app`
 - 自动化测试：`ruoyi-fastapi-test`
@@ -16,6 +17,7 @@
 |------|------|--------------|
 | `ruoyi-fastapi-backend/` | FastAPI 后端，负责管理端和 Portal API | `http://127.0.0.1:9099` |
 | `ruoyi-fastapi-frontend/` | 管理后台（Vue3 + Element Plus） | `http://localhost:5174` |
+| `ruoyi-admin-style-template/` | 后台前端样式模板（Vue3 + Element Plus） | `http://localhost:5173` |
 | `ruoyi-fastapi-desktop-web/` | Portal Web（React + TypeScript） | `http://localhost:5175` |
 | `ruoyi-fastapi-app/` | uni-app（H5 / 小程序 / APP） | H5 默认 `http://localhost:9090` |
 | `ruoyi-fastapi-test/` | pytest + Playwright 测试套件 | 依赖上面服务 |
