@@ -15,6 +15,8 @@ from module_kb.entity.vo.kb_tag_vo import (
 )
 from utils.common_util import CamelCaseUtil
 
+MAX_TAG_NAME_LENGTH = 100
+
 
 class ToolKbTagService:
     """
@@ -29,8 +31,8 @@ class ToolKbTagService:
             name = str(raw_name or '').strip()
             if not name or name in seen:
                 continue
-            if len(name) > 100:
-                raise ServiceException(message='标签名称长度不能超过100个字符')
+            if len(name) > MAX_TAG_NAME_LENGTH:
+                raise ServiceException(message=f'标签名称长度不能超过{MAX_TAG_NAME_LENGTH}个字符')
             seen.add(name)
             result.append(name)
         return result
@@ -176,4 +178,3 @@ class ToolKbTagService:
         tags = await ToolKbTagDao.get_tag_list_by_ids(query_db, unique_ids)
         tag_map = {int(tag.tag_id): tag for tag in tags}
         return [tag_map[tag_id] for tag_id in unique_ids if tag_id in tag_map]
-

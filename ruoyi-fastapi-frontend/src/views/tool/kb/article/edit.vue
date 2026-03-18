@@ -129,7 +129,7 @@
           </el-col>
           <el-col :span="12">
             <div class="md-preview">
-              <MarkdownRender :content="form.contentMd || ''" />
+              <MarkdownPreview :content="form.contentMd || ''" />
             </div>
           </el-col>
         </el-row>
@@ -266,8 +266,7 @@
 </template>
 
 <script setup name="KbArticleEdit">
-import { MarkdownRender } from 'markstream-vue'
-import 'markstream-vue/index.css'
+import MarkdownPreview from '@/components/MarkdownPreview'
 
 import { addKbArticle, getKbArticle, updateKbArticle } from '@/api/tool/kb/article'
 import { listKbCategoryOptions } from '@/api/tool/kb/category'

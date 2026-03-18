@@ -372,13 +372,13 @@
                 </el-col>
                 <el-col :span="12">
                   <div class="md-preview">
-                    <MarkdownRender :content="form.descriptionMd || ''" />
+                    <MarkdownPreview :content="form.descriptionMd || ''" />
                   </div>
                 </el-col>
               </el-row>
             </div>
             <div v-else class="md-preview">
-              <MarkdownRender :content="form.descriptionMd || ''" />
+              <MarkdownPreview :content="form.descriptionMd || ''" />
             </div>
           </el-tab-pane>
 
@@ -395,13 +395,13 @@
                 </el-col>
                 <el-col :span="12">
                   <div class="md-preview">
-                    <MarkdownRender :content="form.usageMd || ''" />
+                    <MarkdownPreview :content="form.usageMd || ''" />
                   </div>
                 </el-col>
               </el-row>
             </div>
             <div v-else class="md-preview">
-              <MarkdownRender :content="form.usageMd || ''" />
+              <MarkdownPreview :content="form.usageMd || ''" />
             </div>
           </el-tab-pane>
 
@@ -514,8 +514,7 @@
 <script setup>
 import { listSoftwareCategoryOptions } from '@/api/tool/software/category'
 import { getSoftwareItem, listSoftwareItem, updateSoftwareItem } from '@/api/tool/software/item'
-import { MarkdownRender } from 'markstream-vue'
-import 'markstream-vue/index.css'
+import MarkdownPreview from '@/components/MarkdownPreview'
 
 const { proxy } = getCurrentInstance()
 const { sys_normal_disable } = proxy.useDict('sys_normal_disable')

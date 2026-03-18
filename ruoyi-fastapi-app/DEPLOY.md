@@ -10,15 +10,16 @@
 
 发布前先检查：
 
-- `src/config.js`
+- `.env.production`
 
-把 `baseUrl` 改成目标环境可访问的地址。
+把 `VITE_API_BASE_URL` 改成目标环境可访问的地址。
 
 常见示例：
 
-| 环境 | `baseUrl` |
+| 环境 | `VITE_API_BASE_URL` |
 |------|-----------|
 | 本机开发 | `http://localhost:9099` |
+| H5 同域部署 | `/prod-api` |
 | 预发布 | `https://stage.your-domain.com/stage-api` |
 | 生产 | `https://your-domain.com/prod-api` |
 
@@ -77,7 +78,7 @@ server {
 说明：
 
 - App 自己是静态页面
-- 实际 API 走 `src/config.js` 中配置的后端地址
+- 实际 API 走 `.env.*` 中配置的后端地址
 
 ---
 
@@ -131,27 +132,20 @@ pnpm build:custom
 
 1. `manifest.json` 中应用标识正确
 2. 图标、启动页、包名等信息已配置
-3. `src/config.js` 的 `baseUrl` 指向可被真机访问的服务
+3. `.env.production` 或自定义 `.env.<mode>` 中的 `VITE_API_BASE_URL` 指向可被真机访问的服务
 
 ---
 
 ## 5. 多环境发布建议
 
-由于当前 App 没有独立 `.env.*`，建议采用下面方式管理环境：
+当前 App 已内置 `.env.development` / `.env.production`。
 
-### 方案 A：手工切换 `src/config.js`
+如果你需要额外环境，可以继续新增：
 
-适合项目当前结构，最直接。
+- `.env.stage`
+- `.env.test`
 
-### 方案 B：自己扩展一套环境文件
-
-如果后续你希望和 Web 一样管理多环境，可以继续演进为：
-
-- `config.dev.js`
-- `config.stage.js`
-- `config.prod.js`
-
-再在构建前按脚本拷贝或注入。
+然后在对应构建命令里使用目标 mode。
 
 ---
 

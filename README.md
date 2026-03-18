@@ -15,7 +15,7 @@
 | 目录 | 作用 | 默认本机地址 |
 |------|------|--------------|
 | `ruoyi-fastapi-backend/` | FastAPI 后端，负责管理端和 Portal API | `http://127.0.0.1:9099` |
-| `ruoyi-fastapi-frontend/` | 管理后台（Vue3 + Element Plus） | `http://localhost:80` |
+| `ruoyi-fastapi-frontend/` | 管理后台（Vue3 + Element Plus） | `http://localhost:5174` |
 | `ruoyi-fastapi-desktop-web/` | Portal Web（React + TypeScript） | `http://localhost:5175` |
 | `ruoyi-fastapi-app/` | uni-app（H5 / 小程序 / APP） | H5 默认 `http://localhost:9090` |
 | `ruoyi-fastapi-test/` | pytest + Playwright 测试套件 | 依赖上面服务 |
@@ -35,8 +35,12 @@
 最常用的本机开发组合：
 
 ```bash
-# 1) 后端（推荐：直接用统一脚本，默认 dev）
-.\2-backend-start.bat
+# 0) Redis（Windows PowerShell；首次执行先拉镜像；默认配置统一读取 scripts/dev/redis-version.json）
+.\scripts\dev\setup-redis.ps1
+.\scripts\dev\start-redis.ps1
+
+# 1) 后端（推荐：直接用后端目录统一脚本，默认 dev）
+.\ruoyi-fastapi-backend\run.bat
 
 # 2) 管理后台
 cd ../ruoyi-fastapi-frontend
@@ -54,15 +58,34 @@ pnpm install
 pnpm dev:h5
 ```
 
+macOS / Linux 可对应执行：
+
+```bash
+./scripts/dev/setup-redis.sh
+./scripts/dev/start-redis.sh
+```
+
 ---
 
 ## 初始化数据
 
-首次运行至少需要执行以下 SQL：
+这里不是“3 个数据库”，而是“同一个数据库的 3 段初始化 SQL”。
+
+推荐直接使用汇总入口：
+
+1. `ruoyi-fastapi-backend/sql/ruoyi-fastapi-all.sql`
+
+如果你想按模块拆开执行，也可以继续沿用：
 
 1. `ruoyi-fastapi-backend/sql/ruoyi-fastapi.sql`
 2. `ruoyi-fastapi-backend/sql/ruoyi-fastapi-software.sql`
 3. `ruoyi-fastapi-backend/sql/ruoyi-fastapi-kb.sql`
+
+MySQL 命令行一键导入示例（从仓库根目录执行）：
+
+```bash
+mysql -h 127.0.0.1 -u root -p ruoyi-fastapi < ruoyi-fastapi-backend/sql/ruoyi-fastapi-all.sql
+```
 
 默认管理员账号：
 
@@ -88,10 +111,10 @@ pnpm dev:h5
 示例：
 
 ```bash
-.\2-backend-start.bat
-.\2-backend-start.bat prod
-.\2-backend-start.bat dockermy
-.\2-backend-start.bat dockerpg
+.\ruoyi-fastapi-backend\run.bat
+.\ruoyi-fastapi-backend\run.bat prod
+.\ruoyi-fastapi-backend\run.bat dockermy
+.\ruoyi-fastapi-backend\run.bat dockerpg
 ```
 
 说明：
@@ -124,10 +147,33 @@ pnpm dev:h5
 
 ### App
 
-`ruoyi-fastapi-app` 没有独立 `.env.*`，当前通过 `src/config.js` 切换后端地址：
+`ruoyi-fastapi-app` 现在已支持独立 `.env.*`：
 
-- 本机开发：`baseUrl = "http://localhost:9099"`
-- 生产部署：`baseUrl = "https://your-domain.com/prod-api"`
+| 模式 | 配置文件 | 关键变量 |
+|------|----------|----------|
+| 开发 | `.env.development` | `VITE_API_BASE_URL=http://localhost:9099` |
+| 生产 | `.env.production` | `VITE_API_BASE_URL=/prod-api` |
+| 参考模板 | `.env.example` | 可复制为自定义环境 |
+
+---
+
+## Redis 版本约定
+
+仓库现在把本机 Redis 辅助脚本的默认配置集中放在：
+
+- `scripts/dev/redis-version.json`
+
+当前默认值：
+
+- 镜像：`redis:7.4.8`
+- 本机容器名：`ruoyi-redis-local`
+- 本机端口：`6379`
+
+说明：
+
+- `setup-redis.ps1/.sh` 和 `start-redis.ps1/.sh` 会优先读取这份文件
+- 根目录和测试目录里的 Docker Compose 也已经固定到同一个 Redis 版本
+- 如果后面要升级 Redis，优先先改这份版本清单，再同步 compose 中的镜像标签
 
 ---
 
@@ -137,8 +183,8 @@ pnpm dev:h5
 
 | 文件 | 说明 | 暴露地址 |
 |------|------|----------|
-| `docker-compose.my.yml` | MySQL + Redis + 后端 + 管理后台 | 后端 `19099`，后台 `12580` |
-| `docker-compose.pg.yml` | PostgreSQL + Redis + 后端 + 管理后台 | 后端 `19099`，后台 `12580` |
+| `docker-compose.my.yml` | MySQL + Redis + 后端 + 管理后台（自动导入基础 + software + kb 全量业务 SQL） | 后端 `19099`，后台 `12580` |
+| `docker-compose.pg.yml` | PostgreSQL + Redis + 后端 + 管理后台（自动导入基础 + software + kb 全量业务 SQL） | 后端 `19099`，后台 `12580` |
 
 MySQL 版本示例：
 

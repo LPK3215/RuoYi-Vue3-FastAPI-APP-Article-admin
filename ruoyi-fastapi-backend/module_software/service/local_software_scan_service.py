@@ -1,11 +1,15 @@
 import re
 import sys
 from dataclasses import dataclass
+from typing import Any
 
 try:
-    import winreg  # type: ignore
+    import winreg as winreg_module
 except ImportError:  # pragma: no cover
-    winreg = None  # type: ignore
+    winreg_module = None
+
+
+winreg: Any = winreg_module
 
 
 @dataclass
@@ -70,88 +74,75 @@ def _is_noise_name(name: str) -> bool:
     return False
 
 
-def scan_installed_software(keyword: str | None = None, limit: int = 500) -> list[InstalledSoftware]:
-    if winreg is None or not sys.platform.startswith('win'):
-        return []
-
-    kw = (keyword or '').strip().lower()
+def _normalize_limit(limit: int) -> int:
     safe_limit = int(limit or 0)
     if safe_limit <= 0:
         safe_limit = 500
-    safe_limit = min(3000, safe_limit)
+    return min(3000, safe_limit)
 
-    results: list[InstalledSoftware] = []
 
-    def walk(root: int, view_flag: int, scope: str) -> None:
-        try:
-            base = winreg.OpenKey(root, _UNINSTALL_PATH, 0, winreg.KEY_READ | view_flag)
-        except OSError:
+def _match_keyword(keyword: str, display_name: str, display_version: str | None, publisher: str | None) -> bool:
+    if not keyword:
+        return True
+    hay = ' '.join([display_name or '', display_version or '', publisher or '']).lower()
+    return keyword in hay
+
+
+def _append_registry_items(
+    results: list[InstalledSoftware], keyword: str, safe_limit: int, root: int, view_flag: int, scope: str
+) -> None:
+    if winreg is None:
+        return
+
+    try:
+        base = winreg.OpenKey(root, _UNINSTALL_PATH, 0, winreg.KEY_READ | view_flag)
+    except OSError:
+        return
+    try:
+        count, _sub, _mtime = winreg.QueryInfoKey(base)
+    except OSError:
+        return
+
+    for idx in range(count):
+        if len(results) >= safe_limit:
             return
         try:
-            count, _sub, _mtime = winreg.QueryInfoKey(base)
+            sub_name = winreg.EnumKey(base, idx)
+            sub_key = winreg.OpenKey(base, sub_name)
         except OSError:
-            return
+            continue
 
-        for idx in range(count):
-            if len(results) >= safe_limit:
-                return
-            try:
-                sub_name = winreg.EnumKey(base, idx)
-                sub_key = winreg.OpenKey(base, sub_name)
-            except OSError:
+        try:
+            display_name = _read_value(sub_key, 'DisplayName')
+            if not display_name or _is_noise_name(display_name):
                 continue
 
-            try:
-                display_name = _read_value(sub_key, 'DisplayName')
-                if not display_name:
-                    continue
-                if _is_noise_name(display_name):
-                    continue
+            display_version = _read_value(sub_key, 'DisplayVersion')
+            publisher = _read_value(sub_key, 'Publisher')
+            if not _match_keyword(keyword, display_name, display_version, publisher):
+                continue
 
-                display_version = _read_value(sub_key, 'DisplayVersion')
-                publisher = _read_value(sub_key, 'Publisher')
-                install_location = _read_value(sub_key, 'InstallLocation')
-                icon_path = _normalize_icon_path(_read_value(sub_key, 'DisplayIcon'))
-                url = _read_value(sub_key, 'URLInfoAbout') or _read_value(sub_key, 'HelpLink')
-                uninstall_string = _read_value(sub_key, 'UninstallString')
-
-                # keyword filter
-                if kw:
-                    hay = ' '.join(
-                        [
-                            display_name or '',
-                            display_version or '',
-                            publisher or '',
-                        ]
-                    ).lower()
-                    if kw not in hay:
-                        continue
-
-                results.append(
-                    InstalledSoftware(
-                        id=f'{scope}:{_UNINSTALL_PATH}\\{sub_name}',
-                        name=display_name,
-                        version=display_version,
-                        publisher=publisher,
-                        install_location=install_location,
-                        icon_path=icon_path,
-                        url=url,
-                        uninstall_string=uninstall_string,
-                        scope=scope,
-                    )
+            results.append(
+                InstalledSoftware(
+                    id=f'{scope}:{_UNINSTALL_PATH}\\{sub_name}',
+                    name=display_name,
+                    version=display_version,
+                    publisher=publisher,
+                    install_location=_read_value(sub_key, 'InstallLocation'),
+                    icon_path=_normalize_icon_path(_read_value(sub_key, 'DisplayIcon')),
+                    url=_read_value(sub_key, 'URLInfoAbout') or _read_value(sub_key, 'HelpLink'),
+                    uninstall_string=_read_value(sub_key, 'UninstallString'),
+                    scope=scope,
                 )
-            finally:
-                try:
-                    winreg.CloseKey(sub_key)
-                except OSError:
-                    pass
+            )
+        finally:
+            try:
+                winreg.CloseKey(sub_key)
+            except OSError:
+                pass
 
-    # 64-bit view + 32-bit view + HKCU
-    walk(winreg.HKEY_LOCAL_MACHINE, winreg.KEY_WOW64_64KEY, 'HKLM')
-    walk(winreg.HKEY_LOCAL_MACHINE, winreg.KEY_WOW64_32KEY, 'WOW6432')
-    walk(winreg.HKEY_CURRENT_USER, 0, 'HKCU')
 
-    # 去重：按 name+version+publisher
+def _deduplicate_results(results: list[InstalledSoftware]) -> list[InstalledSoftware]:
     seen: set[tuple[str, str | None, str | None]] = set()
     uniq: list[InstalledSoftware] = []
     for item in results:
@@ -160,7 +151,18 @@ def scan_installed_software(keyword: str | None = None, limit: int = 500) -> lis
             continue
         seen.add(key)
         uniq.append(item)
-
-    # 排序：名称
     uniq.sort(key=lambda x: x.name.lower())
     return uniq
+
+
+def scan_installed_software(keyword: str | None = None, limit: int = 500) -> list[InstalledSoftware]:
+    if winreg is None or not sys.platform.startswith('win'):
+        return []
+
+    kw = (keyword or '').strip().lower()
+    safe_limit = _normalize_limit(limit)
+    results: list[InstalledSoftware] = []
+    _append_registry_items(results, kw, safe_limit, winreg.HKEY_LOCAL_MACHINE, winreg.KEY_WOW64_64KEY, 'HKLM')
+    _append_registry_items(results, kw, safe_limit, winreg.HKEY_LOCAL_MACHINE, winreg.KEY_WOW64_32KEY, 'WOW6432')
+    _append_registry_items(results, kw, safe_limit, winreg.HKEY_CURRENT_USER, 0, 'HKCU')
+    return _deduplicate_results(results)

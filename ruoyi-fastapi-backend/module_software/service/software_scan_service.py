@@ -14,11 +14,11 @@ from module_software.entity.vo.software_scan_vo import (
     LocalSoftwareScanImportResultModel,
     LocalSoftwareScanQueryModel,
 )
-from module_software.service.local_software_scan_service import scan_installed_software
-
+from module_software.service.local_software_scan_service import InstalledSoftware, scan_installed_software
 
 DEFAULT_IMPORTED_CATEGORY_CODE = 'local-import'
 DEFAULT_IMPORTED_CATEGORY_NAME = '本机导入'
+MAX_ERROR_SAMPLES = 10
 
 
 def _trim(s: str | None) -> str | None:
@@ -78,6 +78,92 @@ class ToolSoftwareScanService:
         return int(db_category.category_id)
 
     @classmethod
+    def _resolve_selected_items(
+        cls, scanned: list[InstalledSoftware], request: LocalSoftwareScanImportRequestModel
+    ) -> list[InstalledSoftware]:
+        if not request.ids:
+            return list(scanned)
+        scanned_map = {item.id: item for item in scanned}
+        return [item for item_id in request.ids if (item := scanned_map.get(item_id)) is not None]
+
+    @classmethod
+    def _build_payload(
+        cls, item: InstalledSoftware, category_id: int, operator_name: str, now: datetime
+    ) -> dict[str, object]:
+        payload = {
+            'category_id': int(category_id),
+            'software_name': _trim(item.name),
+            'short_desc': _trim(item.publisher),
+            'official_url': _trim(item.url),
+            'tags': None,
+            'status': '0',
+            'del_flag': '0',
+            'publish_status': '0',
+            'software_sort': 0,
+            'update_by': operator_name,
+            'update_time': now,
+        }
+        remark = cls._build_remark(item)
+        if remark:
+            payload['remark'] = remark
+        return payload
+
+    @classmethod
+    def _build_remark(cls, item: InstalledSoftware) -> str | None:
+        icon_path = _trim(item.icon_path)
+        install_location = _trim(item.install_location)
+        version = _trim(item.version)
+
+        remark_parts: list[str] = []
+        if version:
+            remark_parts.append(f'本机版本：{version}')
+        if install_location:
+            remark_parts.append(f'安装路径：{install_location}')
+        if icon_path:
+            remark_parts.append(f'图标路径：{icon_path}')
+        if item.uninstall_string:
+            remark_parts.append('已记录卸载信息')
+        if not remark_parts:
+            return None
+        return '；'.join(remark_parts)[:500]
+
+    @classmethod
+    async def _create_software(cls, query_db: AsyncSession, payload: dict, operator_name: str, now: datetime) -> None:
+        create_payload = {
+            **payload,
+            'create_by': operator_name,
+            'create_time': now,
+        }
+        await ToolSoftwareDao.add_software_dao(query_db, ToolSoftwareModel(**create_payload))
+        await query_db.flush()
+
+    @classmethod
+    async def _update_software(
+        cls,
+        query_db: AsyncSession,
+        payload: dict,
+        existing_id: int,
+        request: LocalSoftwareScanImportRequestModel,
+    ) -> bool:
+        if not request.update_support:
+            return False
+
+        current = await ToolSoftwareDao.get_software_detail_by_id(query_db, existing_id)
+        if not current:
+            return False
+
+        edit_payload = {'software_id': existing_id, **payload}
+        if not request.overwrite:
+            if getattr(current, 'short_desc', None):
+                edit_payload.pop('short_desc', None)
+            if getattr(current, 'official_url', None):
+                edit_payload.pop('official_url', None)
+            if getattr(current, 'remark', None):
+                edit_payload.pop('remark', None)
+        await ToolSoftwareDao.edit_software_dao(query_db, edit_payload)
+        return True
+
+    @classmethod
     async def import_services(
         cls,
         query_db: AsyncSession,
@@ -85,14 +171,7 @@ class ToolSoftwareScanService:
         operator_name: str,
     ) -> CrudResponseModel:
         scanned = scan_installed_software(keyword=None, limit=3000)
-        scanned_map = {i.id: i for i in scanned}
-
-        selected_ids = request.ids or []
-        if selected_ids:
-            selected = [scanned_map.get(i) for i in selected_ids]
-            selected = [x for x in selected if x is not None]
-        else:
-            selected = list(scanned)
+        selected = cls._resolve_selected_items(scanned, request)
 
         category_id = request.category_id
         if category_id is None or int(category_id or 0) <= 0:
@@ -109,80 +188,31 @@ class ToolSoftwareScanService:
                     skipped += 1
                     continue
 
-                # 查询同名软件（精确匹配，未删除）
                 existing = await ToolSoftwareDao.get_software_detail_by_name(query_db, name)
                 existing_id: int | None = int(existing.software_id) if existing else None
 
                 now = datetime.now()
-                payload = {
-                    'category_id': int(category_id),
-                    'software_name': name,
-                    'short_desc': _trim(item.publisher),
-                    'official_url': _trim(item.url),
-                    'tags': None,
-                    'status': '0',
-                    'del_flag': '0',
-                    'publish_status': '0',
-                    'software_sort': 0,
-                    'update_by': operator_name,
-                    'update_time': now,
-                }
-
-                # iconPath：如果是本机路径，先不直接暴露，转成备注提示
-                icon_path = _trim(item.icon_path)
-                install_location = _trim(item.install_location)
-                version = _trim(item.version)
-
-                remark_parts: list[str] = []
-                if version:
-                    remark_parts.append(f'本机版本：{version}')
-                if install_location:
-                    remark_parts.append(f'安装路径：{install_location}')
-                if icon_path:
-                    remark_parts.append(f'图标路径：{icon_path}')
-                if item.uninstall_string:
-                    remark_parts.append('已记录卸载信息')
-                if remark_parts:
-                    payload['remark'] = '；'.join(remark_parts)[:500]
+                payload = cls._build_payload(item, int(category_id), operator_name, now)
+                payload['software_name'] = name
 
                 if existing_id is None:
-                    payload['create_by'] = operator_name
-                    payload['create_time'] = now
-                    db_software = await ToolSoftwareDao.add_software_dao(query_db, ToolSoftwareModel(**payload))
-                    await query_db.flush()
+                    await cls._create_software(query_db, payload, operator_name, now)
                     created += 1
                 else:
-                    if not request.update_support:
+                    if not await cls._update_software(query_db, payload, existing_id, request):
                         skipped += 1
                         continue
-
-                    # 默认只补齐空字段；overwrite=true 才覆盖
-                    current = await ToolSoftwareDao.get_software_detail_by_id(query_db, existing_id)
-                    if not current:
-                        skipped += 1
-                        continue
-
-                    edit_payload = {'software_id': existing_id, **payload}
-                    if not request.overwrite:
-                        # 不覆盖已有的 short_desc / official_url / remark
-                        if getattr(current, 'short_desc', None):
-                            edit_payload.pop('short_desc', None)
-                        if getattr(current, 'official_url', None):
-                            edit_payload.pop('official_url', None)
-                        if getattr(current, 'remark', None):
-                            edit_payload.pop('remark', None)
-                    await ToolSoftwareDao.edit_software_dao(query_db, edit_payload)
                     updated += 1
             except Exception as exc:
                 errors += 1
-                if len(error_samples) < 10:
+                if len(error_samples) < MAX_ERROR_SAMPLES:
                     error_samples.append(f'{getattr(item, "name", "<unknown>")}: {exc}')
 
         try:
             await query_db.commit()
         except Exception as exc:
             await query_db.rollback()
-            raise ServiceException(message=str(exc))
+            raise ServiceException(message=str(exc)) from exc
 
         result = LocalSoftwareScanImportResultModel(
             scanned=len(scanned),
@@ -194,6 +224,4 @@ class ToolSoftwareScanService:
             errorSamples=error_samples,
         )
         return CrudResponseModel(is_success=True, message='导入完成', result=result)
-
-
 

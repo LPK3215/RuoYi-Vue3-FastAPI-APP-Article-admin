@@ -54,24 +54,24 @@ class RedisUtil:
         if log_start_enabled is None:
             log_start_enabled = log_enabled
         if log_start_enabled:
-            logger.info('🔎 开始连接redis...')
+            logger.info('开始连接 Redis...')
         try:
             connection = await redis.ping()
             if not log_enabled:
                 return
             if connection:
-                logger.info('✅️ redis连接成功')
+                logger.info('Redis 连接成功')
             else:
-                logger.error('❌️ redis连接失败')
+                logger.error('Redis 连接失败')
         except AuthenticationError as e:
             if log_enabled:
-                logger.error(f'❌️ redis用户名或密码错误，详细错误信息：{e}')
+                logger.error(f'Redis 用户名或密码错误，详细错误信息：{e}')
         except RedisTimeoutError as e:
             if log_enabled:
-                logger.error(f'❌️ redis连接超时，详细错误信息：{e}')
+                logger.error(f'Redis 连接超时，详细错误信息：{e}')
         except RedisError as e:
             if log_enabled:
-                logger.error(f'❌️ redis连接错误，详细错误信息：{e}')
+                logger.error(f'Redis 连接错误，详细错误信息：{e}')
 
     @classmethod
     async def close_redis_pool(cls, app: FastAPI) -> None:
@@ -82,10 +82,10 @@ class RedisUtil:
         :return:
         """
         await app.state.redis.close()
-        logger.info('✅️ 关闭redis连接成功')
+        logger.info('Redis 连接已关闭')
 
     @classmethod
-    async def init_sys_dict(cls, redis: FastAPI) -> None:
+    async def init_sys_dict(cls, redis: aioredis.Redis) -> None:
         """
         应用启动时缓存字典表
 

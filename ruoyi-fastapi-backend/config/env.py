@@ -113,6 +113,21 @@ class LogSettings(BaseSettings):
     log_worker_id: str = 'auto'
 
 
+class AIBootstrapSettings(BaseSettings):
+    """
+    AI 默认模型初始化配置
+    """
+
+    ai_bootstrap_enabled: bool = True
+    ai_bootstrap_ollama_model_code: str = 'qwen2.5:7b'
+    ai_bootstrap_ollama_model_name: str = 'Qwen2.5 7B'
+    ai_bootstrap_ollama_base_url: str = 'http://127.0.0.1:11434'
+    ai_bootstrap_openai_template_enabled: bool = True
+    ai_bootstrap_openai_model_code: str = 'gpt-4.1-mini'
+    ai_bootstrap_openai_model_name: str = 'GPT-4.1 mini'
+    ai_bootstrap_openai_base_url: str = 'https://api.openai.com/v1'
+
+
 class GenSettings:
     """
     代码生成配置
@@ -228,6 +243,12 @@ class GetConfig:
         """
         return LogSettings()
 
+    def get_ai_bootstrap_config(self) -> AIBootstrapSettings:
+        """
+        获取 AI 默认模型初始化配置
+        """
+        return AIBootstrapSettings()
+
     def get_gen_config(self) -> GenSettings:
         """
         获取代码生成配置
@@ -292,6 +313,8 @@ DataBaseConfig = get_config.get_database_config()
 RedisConfig = get_config.get_redis_config()
 # 日志配置
 LogConfig = get_config.get_log_config()
+# AI 默认模型初始化配置
+AIBootstrapConfig = get_config.get_ai_bootstrap_config()
 # 代码生成配置
 GenConfig = get_config.get_gen_config()
 # 上传配置

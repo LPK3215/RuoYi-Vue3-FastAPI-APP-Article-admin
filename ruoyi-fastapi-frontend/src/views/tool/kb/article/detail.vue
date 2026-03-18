@@ -43,7 +43,7 @@
           </template>
 
           <div class="md-preview">
-            <MarkdownRender :content="detail.contentMd || ''" />
+            <MarkdownPreview :content="detail.contentMd || ''" />
             <div class="muted" v-if="!detail.contentMd">暂无正文</div>
           </div>
         </el-card>
@@ -256,8 +256,7 @@
 </template>
 
 <script setup name="KbArticleDetail">
-import { MarkdownRender } from 'markstream-vue'
-import 'markstream-vue/index.css'
+import MarkdownPreview from '@/components/MarkdownPreview'
 
 import { getKbArticle } from '@/api/tool/kb/article'
 import { updateKbArticle } from '@/api/tool/kb/article'

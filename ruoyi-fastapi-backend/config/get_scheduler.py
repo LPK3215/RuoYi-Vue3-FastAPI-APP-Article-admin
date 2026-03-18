@@ -207,7 +207,7 @@ class SchedulerUtil:
         :return:
         """
         cls._redis = redis
-        logger.info(f'🔎 Worker {cls._worker_id} 尝试获取 Application 锁...')
+        logger.info(f'Worker {cls._worker_id} 尝试获取 Application 锁...')
 
         acquired = await StartupUtil.acquire_startup_log_gate(
             redis=redis,
@@ -220,7 +220,7 @@ class SchedulerUtil:
             await cls._start_scheduler_as_leader(redis)
         else:
             cls._is_leader = False
-            logger.info(f'⏸️ Worker {cls._worker_id} 未持有 Application 锁，跳过 Scheduler 启动')
+            logger.info(f'Worker {cls._worker_id} 未持有 Application 锁，跳过 Scheduler 启动')
 
     @classmethod
     async def _start_scheduler_as_leader(cls, redis: aioredis.Redis) -> None:
@@ -232,7 +232,7 @@ class SchedulerUtil:
         """
         cls._is_leader = True
         cls._disposed_sync_engines = False
-        logger.info(f'🎯 Worker {cls._worker_id} 持有 Application 锁，开始启动定时任务...')
+        logger.info(f'Worker {cls._worker_id} 持有 Application 锁，开始启动定时任务...')
         # 懒加载配置 scheduler
         cls._configure_scheduler()
         scheduler.start()
@@ -258,7 +258,7 @@ class SchedulerUtil:
             )
             cls._sync_listener_task = asyncio.create_task(cls._listen_sync_channel(redis))
 
-        logger.info('✅️ 系统初始定时任务加载成功')
+        logger.info('系统初始定时任务加载成功')
 
     @classmethod
     def on_lock_lost(cls) -> None:
@@ -270,7 +270,7 @@ class SchedulerUtil:
         if not cls._is_leader:
             return
         cls._is_leader = False
-        logger.warning(f'⚠️ Worker {cls._worker_id} 失去 Application 锁')
+        logger.warning(f'Worker {cls._worker_id} 失去 Application 锁')
         if cls._lock_lost_task:
             cls._lock_lost_task.cancel()
         cls._lock_lost_task = asyncio.create_task(cls._handle_lock_lost())
@@ -327,7 +327,7 @@ class SchedulerUtil:
                 jobs_to_remove = scheduler_job_ids - db_enabled_ids
                 for job_id in jobs_to_remove:
                     scheduler.remove_job(job_id=job_id)
-                    logger.info(f'🗑️ 同步移除任务: {job_id}')
+                    logger.info(f'同步移除任务: {job_id}')
                     cls._refresh_job_update_cache(job_id, None)
 
                 jobs_to_add = db_enabled_ids - scheduler_job_ids
@@ -335,7 +335,7 @@ class SchedulerUtil:
                     job_info = db_job_map.get(job_id)
                     if job_info:
                         cls._add_job_to_scheduler(job_info)
-                        logger.info(f'➕ 同步添加任务: {job_info.job_name}')
+                        logger.info(f'同步添加任务: {job_info.job_name}')
                         cls._refresh_job_update_cache(job_id, job_info.update_time)
 
                 jobs_to_update = db_enabled_ids & scheduler_job_ids
@@ -346,7 +346,7 @@ class SchedulerUtil:
                     cls._sync_update_job(job_id, job_info, scheduler_job, job_update_time)
 
         except Exception as e:
-            logger.error(f'❌ 任务同步异常: {e}')
+            logger.error(f'任务同步异常: {e}')
 
     @classmethod
     def _is_job_config_in_sync(cls, scheduler_job: Job, job_info: JobModel) -> bool:
@@ -409,7 +409,7 @@ class SchedulerUtil:
         if not cls._is_job_config_in_sync(scheduler_job, job_info):
             scheduler.remove_job(job_id=job_id)
             cls._add_job_to_scheduler(job_info)
-            logger.info(f'♻️ 同步更新任务: {job_info.job_name}')
+            logger.info(f'同步更新任务: {job_info.job_name}')
         cls._refresh_job_update_cache(job_id, job_update_time)
 
     @classmethod
@@ -607,7 +607,7 @@ class SchedulerUtil:
                 await pubsub.close()
                 raise
             except Exception as e:
-                logger.error(f'❌ Scheduler 同步监听异常: {e}，5秒后重试...')
+                logger.error(f'Scheduler 同步监听异常: {e}，5秒后重试...')
                 await pubsub.close()
                 await asyncio.sleep(5)
             finally:
@@ -639,7 +639,7 @@ class SchedulerUtil:
         except Exception as e:
             status = '1'
             exception_info = str(e)
-            logger.error(f'❌ 异步执行任务 {job_info.job_name} 失败: {e}')
+            logger.error(f'异步执行任务 {job_info.job_name} 失败: {e}')
         finally:
             cls._record_job_execution_log(job_info, job_executor, status, exception_info)
 
@@ -681,7 +681,7 @@ class SchedulerUtil:
             finally:
                 session.close()
         except Exception as e:
-            logger.error(f'❌ 记录任务执行日志失败: {e}')
+            logger.error(f'记录任务执行日志失败: {e}')
 
     @classmethod
     def _prepare_scheduler_job_add(cls, job_info: JobModel) -> dict[str, Any]:
@@ -723,7 +723,7 @@ class SchedulerUtil:
                 scheduler.remove_job(job_id=str(job_info.job_id))
             scheduler.add_job(**cls._prepare_scheduler_job_add(job_info))
         except Exception as e:
-            logger.error(f'❌ 添加任务 {job_info.job_name} 失败: {e}')
+            logger.error(f'添加任务 {job_info.job_name} 失败: {e}')
 
     @classmethod
     async def close_system_scheduler(cls) -> None:
@@ -765,13 +765,13 @@ class SchedulerUtil:
             cls._lock_lost_task = None
         if getattr(scheduler, 'running', False):
             scheduler.shutdown()
-            logger.info('✅️ 关闭定时任务成功')
+            logger.info('关闭定时任务成功')
         # 释放锁
         if cls._redis:
             current_holder = await cls._redis.get(LockConstant.APP_STARTUP_LOCK_KEY)
             if current_holder == cls._worker_id:
                 await cls._redis.delete(LockConstant.APP_STARTUP_LOCK_KEY)
-                logger.info(f'🔓 Worker {cls._worker_id} 释放 Application 锁')
+                logger.info(f'Worker {cls._worker_id} 释放 Application 锁')
 
     @classmethod
     def _import_function(cls, func_path: str) -> Callable[..., Any]:
@@ -825,7 +825,7 @@ class SchedulerUtil:
 
         # 非应用锁 worker：直接执行函数（不通过 scheduler）
         if not cls._is_leader:
-            logger.info(f'📍 当前 Worker 未持有 Application 锁，直接执行任务 {job_info.job_name}')
+            logger.info(f'当前 Worker 未持有 Application 锁，直接执行任务 {job_info.job_name}')
             args = job_info.job_args.split(',') if job_info.job_args else []
             kwargs = json.loads(job_info.job_kwargs) if job_info.job_kwargs else {}
             status = '0'
@@ -838,7 +838,7 @@ class SchedulerUtil:
             except Exception as e:
                 status = '1'
                 exception_info = str(e)
-                logger.error(f'❌ 直接执行任务 {job_info.job_name} 失败: {e}')
+                logger.error(f'直接执行任务 {job_info.job_name} 失败: {e}')
             finally:
                 # 同步任务记录日志（异步任务在 _execute_async_job_with_log 中记录）
                 if not iscoroutinefunction(job_func):
@@ -937,4 +937,4 @@ class SchedulerUtil:
                     finally:
                         session.close()
         except Exception as e:
-            logger.error(f'❌ 调度任务事件监听器异常: {e}')
+            logger.error(f'调度任务事件监听器异常: {e}')

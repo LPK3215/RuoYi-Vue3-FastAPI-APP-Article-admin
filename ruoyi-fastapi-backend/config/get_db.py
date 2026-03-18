@@ -22,10 +22,10 @@ async def init_create_table() -> None:
 
     :return:
     """
-    logger.info('🔎 初始化数据库连接...')
+    logger.info('开始初始化数据库连接...')
     async with async_engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
-    logger.info('✅️ 数据库连接成功')
+    logger.info('数据库连接成功')
 
 
 async def close_async_engine() -> None:

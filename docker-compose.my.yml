@@ -42,7 +42,9 @@ services:
     ports:
       - "13306:3306"
     volumes:
-      - ./ruoyi-fastapi-backend/sql/ruoyi-fastapi.sql:/docker-entrypoint-initdb.d/ruoyi-fastapi.sql
+      - ./ruoyi-fastapi-backend/sql/ruoyi-fastapi.sql:/docker-entrypoint-initdb.d/01-ruoyi-fastapi.sql
+      - ./ruoyi-fastapi-backend/sql/ruoyi-fastapi-software.sql:/docker-entrypoint-initdb.d/02-ruoyi-fastapi-software.sql
+      - ./ruoyi-fastapi-backend/sql/ruoyi-fastapi-kb.sql:/docker-entrypoint-initdb.d/03-ruoyi-fastapi-kb.sql
     command: --character-set-server=utf8mb4 --collation-server=utf8mb4_general_ci --skip-character-set-client-handshake=1
     networks:
       - ruoyi-network
@@ -54,7 +56,8 @@ services:
 
   # Redis服务
   ruoyi-redis:
-    image: redis:latest
+    # 请与 scripts/dev/redis-version.json 保持一致
+    image: redis:7.4.8
     container_name: ruoyi-redis
     ports:
       - "16379:6379"

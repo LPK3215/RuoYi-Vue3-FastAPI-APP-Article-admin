@@ -11,11 +11,11 @@
         >
       </div>
       <div v-show="isReasoningExpanded" class="reasoning-content">
-        <MarkdownRender :content="reasoningContent" :is-dark="isDark" />
+        <MarkdownPreview :content="reasoningContent" :is-dark="isDark" />
       </div>
     </div>
     <div class="ai-message-content">
-      <MarkdownRender :content="content" :is-dark="isDark" />
+      <MarkdownPreview :content="content" :is-dark="isDark" />
     </div>
     <div
       v-if="loading && !content && !reasoningContent"
@@ -30,14 +30,8 @@
 
 <script setup>
 import { computed, ref } from "vue";
-import { MarkdownRender } from "markstream-vue";
+import MarkdownPreview from "@/components/MarkdownPreview";
 import { useDark } from "@vueuse/core";
-import { enableKatex, enableMermaid } from "markstream-vue";
-import "markstream-vue/index.css";
-import "katex/dist/katex.min.css";
-
-enableMermaid();
-enableKatex();
 
 const isDark = useDark();
 

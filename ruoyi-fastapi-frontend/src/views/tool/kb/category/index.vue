@@ -52,6 +52,17 @@
         </el-button>
       </el-col>
       <div class="toolbar-right">
+        <el-radio-group v-model="viewMode" class="view-toggle">
+          <el-radio-button value="table">
+            <el-icon><List /></el-icon>
+            列表
+          </el-radio-button>
+          <el-radio-button value="card">
+            <el-icon><Grid /></el-icon>
+            卡片
+          </el-radio-button>
+        </el-radio-group>
+
         <right-toolbar v-model:showSearch="showSearch" @queryTable="getList"></right-toolbar>
       </div>
     </el-row>
@@ -66,7 +77,13 @@
         </div>
       </template>
 
-      <el-table ref="tableRef" v-loading="loading" :data="categoryList" @selection-change="handleSelectionChange">
+      <el-table
+        v-if="viewMode === 'table'"
+        ref="tableRef"
+        v-loading="loading"
+        :data="categoryList"
+        @selection-change="handleSelectionChange"
+      >
         <el-table-column type="selection" width="55" align="center" />
         <el-table-column label="ID" align="center" prop="categoryId" width="90" />
         <el-table-column label="编码" align="center" prop="categoryCode" width="160" />
@@ -106,6 +123,87 @@
         </el-table-column>
       </el-table>
 
+      <div v-else v-loading="loading" class="card-view">
+        <el-empty v-if="!categoryList.length" description="暂无数据" />
+        <div v-else class="card-grid">
+          <el-card
+            v-for="item in categoryList"
+            :key="item.categoryId"
+            class="category-card"
+            :class="{ 'is-selected': isSelected(item.categoryId) }"
+            :style="categoryCardStyle(item)"
+            shadow="hover"
+            role="button"
+            tabindex="0"
+            @click="toggleSelection(item.categoryId)"
+            @keydown.enter.prevent="toggleSelection(item.categoryId)"
+            @keydown.space.prevent="toggleSelection(item.categoryId)"
+          >
+            <template #header>
+              <div class="category-card-header">
+                <div class="left">
+                  <el-checkbox
+                    :model-value="isSelected(item.categoryId)"
+                    @click.stop
+                    @change="toggleSelection(item.categoryId)"
+                  />
+                  <el-avatar class="category-avatar" shape="square" :size="42">
+                    {{ categoryGlyph(item.categoryName) }}
+                  </el-avatar>
+                  <div class="heading">
+                    <div class="name" :title="item.categoryName">{{ item.categoryName || '-' }}</div>
+                    <div class="meta">
+                      <span class="meta-chip">{{ item.categoryCode || '未设编码' }}</span>
+                      <span class="meta-chip">排序 {{ item.categorySort ?? 0 }}</span>
+                    </div>
+                  </div>
+                </div>
+                <dict-tag :options="sys_normal_disable" :value="item.status" />
+              </div>
+            </template>
+
+            <div class="category-card-body">
+              <div class="category-card-facts">
+                <div class="fact">
+                  <span class="label">分类ID</span>
+                  <strong>#{{ item.categoryId || '-' }}</strong>
+                </div>
+                <div class="fact">
+                  <span class="label">创建时间</span>
+                  <strong>{{ formatCardTime(item.createTime) }}</strong>
+                </div>
+              </div>
+
+              <div class="remark">
+                <span v-if="item.remark">{{ item.remark }}</span>
+                <span v-else class="muted">暂无备注</span>
+              </div>
+            </div>
+
+            <div class="category-card-actions">
+              <el-button
+                link
+                type="primary"
+                icon="Edit"
+                @click.stop="handleUpdate(item)"
+                v-hasPermi="['tool:kb:category:edit']"
+              >
+                修改
+              </el-button>
+              <el-button
+                link
+                type="danger"
+                icon="Delete"
+                @click.stop="handleDelete(item)"
+                v-hasPermi="['tool:kb:category:remove']"
+              >
+                删除
+              </el-button>
+            </div>
+          </el-card>
+        </div>
+      </div>
+
       <pagination
         v-show="total > 0"
         :total="total"
@@ -115,7 +213,6 @@
       />
     </el-card>
 
-    <!-- 添加或修改分类对话框 -->
     <el-dialog :title="title" v-model="open" width="520px" append-to-body>
       <el-form ref="categoryRef" :model="form" :rules="rules" label-width="90px">
         <el-form-item label="分类名称" prop="categoryName">
@@ -150,6 +247,7 @@
 
 <script setup name="KbCategory">
 import { addKbCategory, delKbCategory, getKbCategory, listKbCategory, updateKbCategory } from '@/api/tool/kb/category'
+import { cardToneVars, firstCardGlyph } from '@/utils/cardTheme'
 import { parseTime } from '@/utils/ruoyi'
 
 const { proxy } = getCurrentInstance()
@@ -159,11 +257,22 @@ const categoryList = ref([])
 const open = ref(false)
 const loading = ref(true)
 const showSearch = ref(true)
+const tableRef = ref()
 const ids = ref([])
 const single = ref(true)
 const multiple = ref(true)
 const total = ref(0)
 const title = ref('')
+const viewModeStorageKey = 'tool:kb:category:viewMode'
+const viewMode = ref('table')
+
+const categoryCardTones = [
+  { accent: '#2f6fed', surface: '#dce8ff', contrast: '#173d84' },
+  { accent: '#1f8a70', surface: '#d8f3ec', contrast: '#145445' },
+  { accent: '#b85c38', surface: '#f5ddcf', contrast: '#7b341b' },
+  { accent: '#7f56d9', surface: '#eadfff', contrast: '#4e2e8e' },
+  { accent: '#0f766e', surface: '#d5f2ee', contrast: '#114f4a' }
+]
 
 const queryParams = ref({
   pageNum: 1,
@@ -187,6 +296,27 @@ const rules = {
   categorySort: [{ required: true, message: '排序不能为空', trigger: 'blur' }]
 }
 
+function loadViewMode() {
+  try {
+    const cached = localStorage.getItem(viewModeStorageKey)
+    viewMode.value = cached === 'card' ? 'card' : 'table'
+  } catch (e) {
+    viewMode.value = 'table'
+  }
+}
+
+function categoryCardStyle(item) {
+  return cardToneVars([item?.categoryName, item?.categoryCode].filter(Boolean).join('|'), categoryCardTones, 'category')
+}
+
+function categoryGlyph(name) {
+  return firstCardGlyph(name, '分')
+}
+
+function formatCardTime(value) {
+  return parseTime(value) || '未记录'
+}
+
 function reset() {
   form.categoryId = undefined
   form.parentId = 0
@@ -196,6 +326,40 @@ function reset() {
   form.status = '0'
   form.remark = undefined
   proxy.resetForm('categoryRef')
+}
+
+function clearSelection() {
+  ids.value = []
+  single.value = true
+  multiple.value = true
+  nextTick(() => {
+    try {
+      tableRef.value?.clearSelection?.()
+    } catch (e) {}
+  })
+}
+
+watch(
+  () => viewMode.value,
+  (val) => {
+    try {
+      localStorage.setItem(viewModeStorageKey, val)
+    } catch (e) {}
+    clearSelection()
+  }
+)
+
+function isSelected(categoryId) {
+  return ids.value.includes(String(categoryId))
+}
+
+function toggleSelection(categoryId) {
+  const id = String(categoryId)
+  if (!id) return
+  const next = ids.value.includes(id) ? ids.value.filter((item) => item !== id) : [...ids.value, id]
+  ids.value = next
+  single.value = next.length !== 1
+  multiple.value = !next.length
 }
 
 function getList() {
@@ -221,7 +385,7 @@ function resetQuery() {
 }
 
 function handleSelectionChange(selection) {
-  ids.value = selection.map((item) => item.categoryId)
+  ids.value = selection.map((item) => String(item.categoryId))
   single.value = selection.length !== 1
   multiple.value = !selection.length
 }
@@ -265,6 +429,7 @@ function handleDelete(row) {
     .then(() => delKbCategory(categoryIds))
     .then(() => {
       proxy.$modal.msgSuccess('删除成功')
+      clearSelection()
       getList()
     })
     .catch(() => {})
@@ -275,6 +440,7 @@ function cancel() {
   reset()
 }
 
+loadViewMode()
 getList()
 </script>
 
@@ -285,6 +451,10 @@ getList()
   background: color-mix(in srgb, var(--app-surface) 92%, transparent);
 }
 
+.category-list-card :deep(.el-card__body) {
+  padding-top: 8px;
+}
+
 .card-header {
   display: flex;
   align-items: center;
@@ -293,10 +463,10 @@ getList()
 }
 
 .title {
-  display: flex;
+  display: inline-flex;
   align-items: center;
   gap: 10px;
-  font-weight: 800;
+  font-weight: 600;
 }
 
 .count-tag {
@@ -309,6 +479,239 @@ getList()
 
 .toolbar-right {
   margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.toolbar-right :deep(.top-right-btn) {
+  margin-left: 0;
+}
+
+.view-toggle :deep(.el-radio-button__inner) {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.card-view {
+  min-height: 240px;
+}
+
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 14px;
+}
+
+.category-card {
+  cursor: pointer;
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--category-accent) 16%, var(--app-border));
+  background: linear-gradient(180deg, color-mix(in srgb, var(--category-surface) 18%, #fff) 0%, #fff 42%);
+  transition: box-shadow 200ms ease, transform 200ms ease, border-color 200ms ease, background 200ms ease;
+}
+
+.category-card :deep(.el-card__header) {
+  border-bottom: none;
+  padding: 14px 16px 0;
+}
+
+.category-card :deep(.el-card__body) {
+  padding: 12px 16px 16px;
+}
+
+.category-card:hover {
+  transform: translateY(-2px);
+  border-color: color-mix(in srgb, var(--category-accent) 42%, var(--app-border));
+}
+
+.category-card.is-selected {
+  border-color: color-mix(in srgb, var(--category-accent) 56%, var(--el-color-primary));
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--category-accent) 20%, transparent), var(--el-box-shadow-light);
+  background: linear-gradient(180deg, color-mix(in srgb, var(--category-surface) 28%, #fff) 0%, #fff 56%);
+}
+
+.category-card:focus {
+  outline: 2px solid var(--el-color-primary);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .category-card {
+    transition: none;
+  }
+
+  .category-card:hover {
+    transform: none;
+  }
+}
+
+.category-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.category-card-header .left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.category-avatar {
+  background: linear-gradient(145deg, var(--category-accent) 0%, var(--category-contrast) 100%);
+  color: #fff;
+  font-size: 18px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.category-card-header .heading {
+  min-width: 0;
+}
+
+.category-card-header .name {
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 1.35;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.category-card-header .meta {
+  margin-top: 6px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.meta-chip {
+  display: inline-flex;
+  align-items: center;
+  min-height: 26px;
+  padding: 0 10px;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--category-accent) 16%, var(--app-border));
+  background: color-mix(in srgb, var(--category-surface) 46%, var(--app-surface));
+  color: var(--el-text-color-secondary);
+  font-size: 12px;
+  white-space: nowrap;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.category-card-body {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.category-card-facts {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.fact {
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid var(--el-border-color-lighter);
+  background: color-mix(in srgb, var(--app-surface) 88%, transparent);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.fact .label {
+  color: var(--el-text-color-secondary);
+  font-size: 12px;
+}
+
+.fact strong {
+  color: var(--el-text-color-primary);
+  font-size: 14px;
+  font-weight: 700;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.remark {
+  color: var(--el-text-color-regular);
+  line-height: 20px;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  min-height: 60px;
+}
+
+.muted {
+  color: var(--el-text-color-secondary);
+}
+
+.category-card-actions {
+  margin-top: auto;
+  padding-top: 12px;
+  border-top: 1px solid var(--el-border-color-lighter);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+@media (max-width: 768px) {
+  .toolbar-right {
+    width: 100%;
+    justify-content: space-between;
+    flex-wrap: wrap;
+  }
+
+  .card-grid {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .category-card :deep(.el-card__header) {
+    padding: 12px 12px 0;
+  }
+
+  .category-card :deep(.el-card__body) {
+    padding: 12px;
+  }
+
+  .category-card-header {
+    align-items: flex-start;
+  }
+
+  .category-card-header .left {
+    gap: 8px;
+  }
+
+  .category-card-facts {
+    grid-template-columns: 1fr;
+  }
+
+  .category-card-actions {
+    justify-content: space-between;
+    gap: 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .category-avatar {
+    width: 38px;
+    height: 38px;
+    font-size: 16px;
+  }
+
+  .meta-chip {
+    max-width: calc(100vw - 160px);
+  }
 }
 </style>
-

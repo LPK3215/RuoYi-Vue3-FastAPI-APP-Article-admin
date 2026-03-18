@@ -52,15 +52,16 @@ npm run dev
 
 默认访问：
 
-- `http://localhost:80`
+- `http://localhost:5174`
 
 默认会把：
 
 - `/dev-api` 代理到 `http://127.0.0.1:9099`
 
-如果后端端口不是 `9099`，请修改：
+如果后端端口或代理目标不是 `9099`，请修改：
 
-- `vite.config.js`
+- `.env.development` 中的 `VITE_DEV_PORT`
+- `.env.development` 中的 `VITE_DEV_PROXY_TARGET`
 
 ---
 
@@ -136,11 +137,11 @@ Windows 还提供了辅助脚本：
 
 ## 9. 常见问题
 
-### 端口 80 被占用
+### 开发端口被占用
 
-修改 `vite.config.js` 中：
+修改 `.env.development` 中：
 
-- `server.port`
+- `VITE_DEV_PORT`
 
 ### 登录 502 / 接口异常
 
@@ -148,7 +149,7 @@ Windows 还提供了辅助脚本：
 
 1. 后端是否已经启动
 2. 后端端口是否还是 `9099`
-3. 开发代理目标是否正确
+3. `.env.development` 里的 `VITE_DEV_PROXY_TARGET` 是否正确
 
 ### 构建后刷新页面 404
 

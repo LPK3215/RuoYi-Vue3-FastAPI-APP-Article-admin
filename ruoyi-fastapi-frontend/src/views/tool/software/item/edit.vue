@@ -167,7 +167,7 @@
               </el-col>
               <el-col :span="12">
                 <div class="md-preview">
-                  <MarkdownRender :content="form.descriptionMd || ''" />
+                  <MarkdownPreview :content="form.descriptionMd || ''" />
                 </div>
               </el-col>
             </el-row>
@@ -188,7 +188,7 @@
               </el-col>
               <el-col :span="12">
                 <div class="md-preview">
-                  <MarkdownRender :content="form.usageMd || ''" />
+                  <MarkdownPreview :content="form.usageMd || ''" />
                 </div>
               </el-col>
             </el-row>
@@ -296,8 +296,7 @@
 </template>
 
 <script setup name="SoftwareItemEdit">
-import { MarkdownRender } from 'markstream-vue'
-import 'markstream-vue/index.css'
+import MarkdownPreview from '@/components/MarkdownPreview'
 
 import { listSoftwareCategoryOptions } from '@/api/tool/software/category'
 import { getSoftwareItem, getSoftwareItemFacets, updateSoftwareItem } from '@/api/tool/software/item'

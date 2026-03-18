@@ -20,6 +20,11 @@
 - Redis 6+
 - MySQL 5.7+ / MariaDB 或 PostgreSQL 13+
 
+补充：
+
+- 本机 Redis 辅助脚本默认配置集中在 `../scripts/dev/redis-version.json`
+- 当前固定镜像为 `redis:7.4.8`
+
 ### 必做项
 
 1. 准备数据库
@@ -78,17 +83,41 @@ python app.py --env stage
 
 ### MySQL / MariaDB
 
-首次部署执行：
+这里不是“3 个数据库”，而是“同一个数据库的 3 段初始化 SQL”。
+
+推荐直接使用汇总入口：
+
+1. `sql/ruoyi-fastapi-all.sql`
+
+如果你想按模块拆开执行，也可以继续沿用：
 
 1. `sql/ruoyi-fastapi.sql`
 2. `sql/ruoyi-fastapi-software.sql`
 3. `sql/ruoyi-fastapi-kb.sql`
 
+MySQL 命令行一键导入示例（从仓库根目录执行）：
+
+```bash
+mysql -h 127.0.0.1 -u root -p ruoyi-fastapi < ruoyi-fastapi-backend/sql/ruoyi-fastapi-all.sql
+```
+
 ### PostgreSQL
 
-首次部署执行：
+推荐直接使用汇总入口：
+
+1. `sql/ruoyi-fastapi-pg-all.sql`
+
+如果你想按模块拆开执行，也可以继续沿用：
 
 1. `sql/ruoyi-fastapi-pg.sql`
+2. `sql/ruoyi-fastapi-pg-software.sql`
+3. `sql/ruoyi-fastapi-pg-kb.sql`
+
+PostgreSQL 命令行一键导入示例（从仓库根目录执行）：
+
+```bash
+psql -h 127.0.0.1 -U postgres -d ruoyi-fastapi -f ruoyi-fastapi-backend/sql/ruoyi-fastapi-pg-all.sql
+```
 
 ### 增量迁移
 
@@ -124,7 +153,7 @@ pip install -r requirements.txt
 仓库根目录也可以直接：
 
 ```powershell
-.\2-backend-start.bat
+.\ruoyi-fastapi-backend\run.bat
 ```
 
 ### PostgreSQL
@@ -195,6 +224,11 @@ docker compose -f docker-compose.my.yml up -d --build
 - MySQL：`13306`
 - Redis：`16379`
 
+说明：
+
+- `docker-compose.my.yml` 现在会自动导入基础 + software + kb 三段 MySQL SQL
+- 不需要再额外手工补执行软件库和 KB 初始化脚本
+
 ### PostgreSQL 版本
 
 ```bash
@@ -220,13 +254,14 @@ MySQL Docker 方案可以直接用：
 
 1. 启动 compose
 2. 等待 MySQL / Redis 健康
-3. 补执行软件库和 KB SQL
+3. 校验数据库中的业务表和菜单
 4. 校验 Portal 接口
 
 说明：
 
 - Docker 场景本质上仍然是同一个后端入口，只是换成 `.env.dockermy` / `.env.dockerpg`
 - 本机开发没问题后，再切到 Docker / 生产环境，排障会简单很多
+- 两套 compose 现在都会自动导入基础 + software + kb 业务 SQL
 
 ---
 
@@ -326,3 +361,12 @@ server {
 - `DB_PORT`
 - 是否导入了正确 SQL
 - PostgreSQL 场景是否安装了 `requirements-pg.txt`
+
+### AI 模块页面是空的
+
+后端现在会在 `ai_models` 为空时自动初始化默认模型模板。
+
+如果你仍然看到空列表，请检查：
+
+- 数据库用户是否有写入 `ai_models` 权限
+- 启动时日志里是否出现 “AI 默认模型初始化完成”

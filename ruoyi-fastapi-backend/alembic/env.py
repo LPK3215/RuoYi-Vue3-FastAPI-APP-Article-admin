@@ -87,9 +87,9 @@ def do_run_migrations(connection: Connection) -> None:
         if all_empty:
             # 如果没有实际变更，不生成迁移文件
             directives[:] = []
-            print('❎️ 未检测到模型变更，不生成迁移文件')
+            print('未检测到模型变更，不生成迁移文件')
         else:
-            print('✅️ 检测到模型变更，生成迁移文件')
+            print('检测到模型变更，生成迁移文件')
 
     context.configure(
         connection=connection,

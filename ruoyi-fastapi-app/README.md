@@ -18,28 +18,22 @@
 
 ## 2. 环境切换方式
 
-当前 App 没有独立的 `.env.*`，而是通过：
-
-- `src/config.js`
-
-来切换后端请求地址。
+当前 App 已支持独立 `.env.*`，默认通过环境变量切换后端请求地址。
 
 ### 当前关键配置
 
-```js
-export default {
-  baseUrl: "http://localhost:9099",
-}
+```dotenv
+VITE_API_BASE_URL=http://localhost:9099
 ```
 
 ### 常见场景
 
-| 场景 | `baseUrl` 示例 |
-|------|----------------|
-| 本机开发 | `http://localhost:9099` |
-| 本机同局域网真机调试 | `http://你的电脑IP:9099` |
-| 生产部署 | `https://your-domain.com/prod-api` |
-| 预发布 | `https://stage.your-domain.com/stage-api` |
+| 场景 | 配置文件 | `VITE_API_BASE_URL` 示例 |
+|------|----------|--------------------------|
+| 本机开发 | `.env.development` | `http://localhost:9099` |
+| 本机同局域网真机调试 | `.env.development` | `http://你的电脑IP:9099` |
+| 生产部署 | `.env.production` | `/prod-api` 或 `https://your-domain.com/prod-api` |
+| 预发布 | `.env.stage` | `https://stage.your-domain.com/stage-api` |
 
 原则：
 
@@ -200,7 +194,7 @@ pnpm install
 
 ### H5 能打开但请求失败
 
-通常是 `src/config.js` 里的 `baseUrl` 没改对：
+通常是 `.env.*` 里的 `VITE_API_BASE_URL` 没配对：
 
 - 本机浏览器开发用 `http://localhost:9099`
 - 真机联调用你电脑的局域网 IP

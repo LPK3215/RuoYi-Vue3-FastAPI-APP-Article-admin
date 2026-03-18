@@ -16,6 +16,9 @@ from module_software.entity.do.software_do import ToolSoftware, ToolSoftwareCate
 from utils.common_util import CamelCaseUtil
 from utils.page_util import PageUtil
 
+DEFAULT_TAG_LIMIT = 50
+MAX_TAG_LIMIT = 200
+
 
 class PortalArticleDao:
     """
@@ -68,9 +71,8 @@ class PortalArticleDao:
         """
         safe_limit = int(limit or 0)
         if safe_limit <= 0:
-            safe_limit = 50
-        if safe_limit > 200:
-            safe_limit = 200
+            safe_limit = DEFAULT_TAG_LIMIT
+        safe_limit = min(MAX_TAG_LIMIT, safe_limit)
 
         query = (
             select(

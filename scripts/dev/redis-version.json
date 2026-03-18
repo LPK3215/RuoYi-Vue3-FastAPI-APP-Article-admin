@@ -1,0 +1,8 @@
+{
+  "image": "redis:7.4.8",
+  "containerName": "ruoyi-redis-local",
+  "port": 6379,
+  "composeServiceName": "ruoyi-redis",
+  "minimumSupportedVersion": "6.2+",
+  "notes": "本机辅助脚本默认使用该镜像；Docker Compose 中的 Redis 镜像也应与此保持一致。"
+}

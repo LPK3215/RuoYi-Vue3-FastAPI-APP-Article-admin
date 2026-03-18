@@ -118,12 +118,12 @@
           <el-tabs v-model="activeTab" type="border-card" class="md-tabs">
             <el-tab-pane label="介绍" name="desc">
               <div class="md-wrap">
-                <MarkdownRender :content="detail.descriptionMd || ''" />
+                <MarkdownPreview :content="detail.descriptionMd || ''" />
               </div>
             </el-tab-pane>
             <el-tab-pane label="使用" name="usage">
               <div class="md-wrap">
-                <MarkdownRender :content="detail.usageMd || ''" />
+                <MarkdownPreview :content="detail.usageMd || ''" />
               </div>
             </el-tab-pane>
           </el-tabs>
@@ -194,8 +194,7 @@
 </template>
 
 <script setup name="SoftwareItemDetail">
-import { MarkdownRender } from 'markstream-vue'
-import 'markstream-vue/index.css'
+import MarkdownPreview from '@/components/MarkdownPreview'
 
 import { parseTime } from '@/utils/ruoyi'
 import { getSoftwareItem } from '@/api/tool/software/item'

@@ -46,15 +46,9 @@ Write-Host "2) Waiting for mysql/redis to be healthy..."
 Wait-ForContainers -TimeoutSeconds $WaitSeconds
 
 if (-not $SkipSql) {
-  Write-Host "3) Applying incremental SQL (software + kb)..."
-  $softwareSql = Join-Path $root "ruoyi-fastapi-backend\\sql\\ruoyi-fastapi-software.sql"
-  $kbSql = Join-Path $root "ruoyi-fastapi-backend\\sql\\ruoyi-fastapi-kb.sql"
-
-  if (-not (Test-Path $softwareSql)) { throw "SQL not found: $softwareSql" }
-  if (-not (Test-Path $kbSql)) { throw "SQL not found: $kbSql" }
-
-  Get-Content $softwareSql -Raw | docker exec -i ruoyi-mysql mysql -uroot -proot -D ruoyi-fastapi | Out-Null
-  Get-Content $kbSql -Raw | docker exec -i ruoyi-mysql mysql -uroot -proot -D ruoyi-fastapi | Out-Null
+  Write-Host "3) Compose init now auto-imports base + software + kb SQL. No extra SQL apply needed."
+} else {
+  Write-Host "3) SkipSql specified. Compose init already covers the full MySQL business SQL set."
 }
 
 Write-Host "4) Verifying KB menus/tables..."
@@ -72,4 +66,3 @@ Write-Host ""
 Write-Host "OK: dockermy is up and KB module looks healthy."
 Write-Host "Admin:  http://127.0.0.1:12580/"
 Write-Host "Backend: http://127.0.0.1:19099/"
-

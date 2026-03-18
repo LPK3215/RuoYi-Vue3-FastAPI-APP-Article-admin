@@ -44,7 +44,9 @@ services:
       - "15433:5432"
     volumes:
       - ../ruoyi-fastapi-backend/sql/ruoyi-fastapi-pg.sql:/docker-entrypoint-initdb.d/01-ruoyi-fastapi-pg.sql
-      - ./disable_captcha.sql:/docker-entrypoint-initdb.d/02-disable-captcha.sql
+      - ../ruoyi-fastapi-backend/sql/ruoyi-fastapi-pg-software.sql:/docker-entrypoint-initdb.d/02-ruoyi-fastapi-pg-software.sql
+      - ../ruoyi-fastapi-backend/sql/ruoyi-fastapi-pg-kb.sql:/docker-entrypoint-initdb.d/03-ruoyi-fastapi-pg-kb.sql
+      - ./disable_captcha.sql:/docker-entrypoint-initdb.d/04-disable-captcha.sql
     networks:
       - ruoyi-network-test
     healthcheck:
@@ -55,7 +57,8 @@ services:
 
   # Redis服务
   ruoyi-redis:
-    image: redis:latest
+    # 请与 ../scripts/dev/redis-version.json 保持一致
+    image: redis:7.4.8
     container_name: ruoyi-redis-test
     ports:
       - "16381:6379"

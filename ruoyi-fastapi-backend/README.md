@@ -51,7 +51,7 @@
 
 ```powershell
 # 仓库根目录，默认 dev
-.\2-backend-start.bat
+.\ruoyi-fastapi-backend\run.bat
 
 # 或者在后端目录中运行，默认 dev
 .\run.bat
@@ -87,11 +87,23 @@ python app.py --env test
 
 ## 3. 数据库初始化
 
-首次部署或首次本机启动，至少需要导入以下 SQL：
+这里不是“3 个数据库”，而是“同一个数据库的 3 段初始化 SQL”。
+
+推荐直接使用汇总入口：
+
+- `sql/ruoyi-fastapi-all.sql`
+
+如果你想按模块拆开执行，也可以继续沿用：
 
 1. 基础表 / 权限 / 字典：`sql/ruoyi-fastapi.sql`
 2. 软件库业务表 + 菜单：`sql/ruoyi-fastapi-software.sql`
 3. 教程 / 知识库：`sql/ruoyi-fastapi-kb.sql`
+
+MySQL 命令行一键导入示例（从仓库根目录执行）：
+
+```bash
+mysql -h 127.0.0.1 -u root -p ruoyi-fastapi < ruoyi-fastapi-backend/sql/ruoyi-fastapi-all.sql
+```
 
 ### 增量 SQL
 
@@ -104,9 +116,21 @@ python app.py --env test
 
 ### PostgreSQL
 
-如果本机或 Docker 使用 PostgreSQL，请导入：
+如果本机或 Docker 使用 PostgreSQL，推荐直接导入：
 
-- `sql/ruoyi-fastapi-pg.sql`
+- `sql/ruoyi-fastapi-pg-all.sql`
+
+如果你想按模块拆开执行，也可以继续沿用：
+
+1. 基础表 / 权限 / 字典 / AI：`sql/ruoyi-fastapi-pg.sql`
+2. 软件库业务表 + 菜单：`sql/ruoyi-fastapi-pg-software.sql`
+3. 教程 / 知识库：`sql/ruoyi-fastapi-pg-kb.sql`
+
+PostgreSQL 命令行一键导入示例（从仓库根目录执行）：
+
+```bash
+psql -h 127.0.0.1 -U postgres -d ruoyi-fastapi -f ruoyi-fastapi-backend/sql/ruoyi-fastapi-pg-all.sql
+```
 
 ---
 
@@ -114,12 +138,33 @@ python app.py --env test
 
 后端依赖 Redis，默认数据库编号是 `2`。
 
-Windows 下仓库内提供了辅助脚本：
+仓库内现在提供的是“固定版本 Docker 本机 Redis”辅助脚本，默认使用 `redis:7.4.8`，避免 Windows 便携版老版本带来的 `XAUTOCLAIM` 兼容问题。
+
+统一版本清单在：
+
+- `../scripts/dev/redis-version.json`
+
+辅助脚本会优先读取这份文件中的镜像、容器名和端口；根目录与测试目录的 Docker Compose 也约定与它保持一致。
+
+- Windows PowerShell
 
 ```powershell
 ..\scripts\dev\setup-redis.ps1
 ..\scripts\dev\start-redis.ps1
 ```
+
+- macOS / Linux
+
+```bash
+../scripts/dev/setup-redis.sh
+../scripts/dev/start-redis.sh
+```
+
+默认会在本机启动容器：
+
+- 容器名：`ruoyi-redis-local`
+- 端口：`127.0.0.1:6379`
+- 数据目录：仓库根目录 `.runtime/redis/data`
 
 ---
 
@@ -222,6 +267,11 @@ docker compose -f docker-compose.my.yml up -d --build
 - 管理后台：`http://127.0.0.1:12580`
 - 后端：`http://127.0.0.1:19099`
 
+说明：
+
+- `docker-compose.my.yml` 现在会自动导入基础 + software + kb 三段 MySQL SQL
+- 不需要再手工补执行软件库和教程库初始化脚本
+
 Windows 也可使用：
 
 ```powershell
@@ -238,6 +288,11 @@ docker compose -f docker-compose.pg.yml up -d --build
 
 - 管理后台：`http://127.0.0.1:12580`
 - 后端：`http://127.0.0.1:19099`
+
+说明：
+
+- `docker-compose.pg.yml` 现在也会自动导入基础 + software + kb 三段 PostgreSQL SQL
+- 不需要再手工补执行软件库和教程库初始化脚本
 
 ---
 
@@ -268,6 +323,7 @@ docker compose -f docker-compose.pg.yml up -d --build
 - `http://127.0.0.1:9099/docs`
 - 登录接口是否可用
 - Redis 是否能写入 token / 锁信息
+- AI 模型管理中是否已经自动生成默认模型模板（空库首次启动会自动补齐）
 
 ### 默认管理员
 

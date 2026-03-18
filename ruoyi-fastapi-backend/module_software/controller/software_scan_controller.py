@@ -7,7 +7,7 @@ from common.aspect.db_seesion import DBSessionDependency
 from common.aspect.interface_auth import UserInterfaceAuthDependency
 from common.aspect.pre_auth import CurrentUserDependency, PreAuthDependency
 from common.router import APIRouterPro
-from common.vo import DataResponseModel, ResponseBaseModel
+from common.vo import DataResponseModel
 from module_admin.entity.vo.user_vo import CurrentUserModel
 from module_software.entity.vo.software_scan_vo import (
     LocalInstalledSoftwareModel,

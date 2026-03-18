@@ -71,8 +71,8 @@ class ToolKbArticleService:
         # 允许前端直接传 /common/upload 返回的 fileName 列表，这里只接受 JSON list
         try:
             data = json.loads(text)
-        except Exception:
-            raise ServiceException(message='附件格式不合法（需为 JSON）')
+        except Exception as exc:
+            raise ServiceException(message='附件格式不合法（需为 JSON）') from exc
 
         if not isinstance(data, list):
             raise ServiceException(message='附件格式不合法（需为数组）')

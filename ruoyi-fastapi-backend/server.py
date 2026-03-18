@@ -13,6 +13,7 @@ from config.get_scheduler import SchedulerUtil
 from exceptions.handle import handle_exception
 from middlewares.handle import handle_middleware
 from module_admin.service.log_service import LogAggregatorService
+from module_ai.service.ai_bootstrap_service import AiBootstrapService
 from sub_applications.handle import handle_sub_applications
 from utils.common_util import worship
 from utils.log_util import logger
@@ -90,6 +91,8 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
         if startup_log_enabled:
             worship()
         await init_create_table()
+        if startup_log_enabled:
+            await AiBootstrapService.bootstrap_default_models()
         await RedisUtil.check_redis_connection(app.state.redis, log_enabled=startup_log_enabled)
         await RedisUtil.init_sys_dict(app.state.redis)
         await RedisUtil.init_sys_config(app.state.redis)

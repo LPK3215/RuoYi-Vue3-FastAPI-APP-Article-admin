@@ -2,10 +2,83 @@ import { defineConfig, loadEnv } from 'vite'
 import path from 'path'
 import createVitePlugins from './vite/plugins'
 
+const UI_PACKAGES = new Set([
+  'vue',
+  'vue-router',
+  'pinia',
+  '@vueuse/core',
+  'element-plus',
+  '@element-plus/icons-vue',
+  'ant-design-vue',
+  '@ant-design/icons-vue'
+])
+const MARKDOWN_PACKAGES = new Set(['markstream-vue', 'stream-markdown', 'vue-i18n', 'katex'])
+const MERMAID_PACKAGES = new Set(['mermaid', '@mermaid-js/parser'])
+const QUILL_PACKAGES = new Set(['@vueup/vue-quill', 'quill'])
+const CHART_PACKAGES = new Set(['echarts', '@antv/g2plot', '@antv/infographic'])
+const UTILS_PACKAGES = new Set([
+  'axios',
+  'uuid',
+  'js-cookie',
+  'jsencrypt',
+  'nprogress',
+  'clipboard',
+  'file-saver',
+  'fuse.js',
+  'splitpanes',
+  'vuedraggable',
+  'vue-cropper'
+])
+
+function getPackageName(normalizedId) {
+  const nodeModulesIndex = normalizedId.lastIndexOf('/node_modules/')
+  if (nodeModulesIndex < 0) {
+    return null
+  }
+  const packagePath = normalizedId.slice(nodeModulesIndex + '/node_modules/'.length)
+  const packageSegments = packagePath.split('/')
+  if (packageSegments[0].startsWith('@')) {
+    return `${packageSegments[0]}/${packageSegments[1]}`
+  }
+  return packageSegments[0]
+}
+
+function resolveManualChunk(id) {
+  const normalizedId = id.replace(/\\/g, '/')
+  if (!normalizedId.includes('/node_modules/')) {
+    return undefined
+  }
+  const packageName = getPackageName(normalizedId)
+  if (!packageName) {
+    return undefined
+  }
+  if (UI_PACKAGES.has(packageName)) {
+    return 'vendor-ui'
+  }
+  if (MARKDOWN_PACKAGES.has(packageName)) {
+    return 'vendor-markdown'
+  }
+  if (MERMAID_PACKAGES.has(packageName)) {
+    return 'vendor-mermaid'
+  }
+  if (QUILL_PACKAGES.has(packageName)) {
+    return 'vendor-quill'
+  }
+  if (CHART_PACKAGES.has(packageName)) {
+    return 'vendor-charts'
+  }
+  if (UTILS_PACKAGES.has(packageName)) {
+    return 'vendor-utils'
+  }
+  return undefined
+}
+
 // https://vitejs.dev/config/
 export default defineConfig(({ mode, command }) => {
   const env = loadEnv(mode, process.cwd())
   const { VITE_APP_ENV } = env
+  const devPort = Number(env.VITE_DEV_PORT || 5174)
+  const devProxyTarget = env.VITE_DEV_PROXY_TARGET || 'http://127.0.0.1:9099'
   return {
     // 部署生产环境和开发环境下的URL。
     // 默认情况下，vite 会假设你的应用是被部署在一个域名的根路径上
@@ -29,9 +102,10 @@ export default defineConfig(({ mode, command }) => {
       sourcemap: command === 'build' ? false : 'inline',
       outDir: 'dist',
       assetsDir: 'assets',
-      chunkSizeWarningLimit: 2000,
+      chunkSizeWarningLimit: 2600,
       rollupOptions: {
         output: {
+          manualChunks: resolveManualChunk,
           chunkFileNames: 'static/js/[name]-[hash].js',
           entryFileNames: 'static/js/[name]-[hash].js',
           assetFileNames: 'static/[ext]/[name]-[hash].[ext]'
@@ -40,13 +114,13 @@ export default defineConfig(({ mode, command }) => {
     },
     // vite 相关配置
     server: {
-      port: 80,
+      port: devPort,
       host: true,
       open: true,
       proxy: {
         // https://cn.vitejs.dev/config/#server-proxy
         '/dev-api': {
-          target: 'http://127.0.0.1:9099',
+          target: devProxyTarget,
           changeOrigin: true,
           rewrite: (p) => p.replace(/^\/dev-api/, '')
         }

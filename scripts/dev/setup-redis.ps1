@@ -1,5 +1,6 @@
 param(
-  [string]$TargetDir = ""
+  [string]$Image,
+  [string]$ContainerName
 )
 
 $ErrorActionPreference = "Stop"
@@ -8,53 +9,65 @@ function Get-RepoRoot {
   return (Resolve-Path (Join-Path $PSScriptRoot "..\\..")).Path
 }
 
+function Get-RedisDefaults {
+  $defaults = @{
+    Image = "redis:7.4.8"
+    ContainerName = "ruoyi-redis-local"
+    Port = 6379
+  }
+
+  $configPath = Join-Path $PSScriptRoot "redis-version.json"
+  if (-not (Test-Path $configPath)) {
+    return $defaults
+  }
+
+  try {
+    $config = Get-Content -Path $configPath -Raw -Encoding UTF8 | ConvertFrom-Json
+    if ($config.image) {
+      $defaults.Image = [string]$config.image
+    }
+    if ($config.containerName) {
+      $defaults.ContainerName = [string]$config.containerName
+    }
+    if ($config.port) {
+      $defaults.Port = [int]$config.port
+    }
+  } catch {
+    Write-Warning "读取 redis-version.json 失败，继续使用内置默认值。$_"
+  }
+
+  return $defaults
+}
+
+function Assert-DockerInstalled {
+  if (-not (Get-Command docker -ErrorAction SilentlyContinue)) {
+    throw "docker 未安装或未加入 PATH，请先安装 Docker Desktop / Docker Engine。"
+  }
+}
+
+$defaults = Get-RedisDefaults
+if (-not $Image) {
+  $Image = $defaults.Image
+}
+if (-not $ContainerName) {
+  $ContainerName = $defaults.ContainerName
+}
+
 $root = Get-RepoRoot
-$runtimeRedis = if ($TargetDir) { $TargetDir } else { (Join-Path $root ".runtime\\redis") }
-New-Item -ItemType Directory -Force -Path $runtimeRedis | Out-Null
+$runtimeRedis = Join-Path $root ".runtime\\redis"
+$runtimeRedisData = Join-Path $runtimeRedis "data"
+New-Item -ItemType Directory -Force -Path $runtimeRedisData | Out-Null
 
-$redisServerExe = Join-Path $runtimeRedis "redis-server.exe"
-if (Test-Path $redisServerExe) {
-  Write-Host "OK: redis already exists at $redisServerExe"
-  exit 0
+Assert-DockerInstalled
+
+Write-Host "Pulling Redis image $Image ..."
+docker pull $Image | Out-Host
+if ($LASTEXITCODE -ne 0) {
+  throw "docker pull 失败，请检查 Docker 是否正常联网。"
 }
 
-Write-Host "Downloading portable Redis (Windows) to $runtimeRedis ..."
+$metaPath = Join-Path $runtimeRedis "redis-image.txt"
+Set-Content -Path $metaPath -Value "$Image`n$ContainerName" -Encoding UTF8
 
-# 1) Get latest tag by following redirects
-$latest = Invoke-WebRequest -Uri "https://github.com/tporadowski/redis/releases/latest" -MaximumRedirection 10
-$finalUrl = $latest.BaseResponse.ResponseUri.AbsoluteUri
-if ($finalUrl -notmatch "/releases/tag/(?<tag>[^/]+)$") {
-  throw "Could not parse latest release tag from URL: $finalUrl"
-}
-$tag = $Matches["tag"]
-
-# 2) Fetch expanded assets HTML (contains actual download links)
-$expandedUrl = "https://github.com/tporadowski/redis/releases/expanded_assets/$tag"
-$expanded = Invoke-WebRequest -Uri $expandedUrl -MaximumRedirection 10
-$content = $expanded.Content
-
-# 3) Find the zip download link
-$zipHrefs = [regex]::Matches($content, 'href=\"([^\"]+\.zip)\"', 'IgnoreCase') | ForEach-Object { $_.Groups[1].Value }
-$candidates = $zipHrefs | Where-Object { $_ -like "*/releases/download/*" -and $_ -like "*/tporadowski/redis/*" }
-if (-not $candidates -or $candidates.Count -eq 0) {
-  throw "Could not find a .zip asset link in expanded_assets page: $expandedUrl"
-}
-$chosen = ($candidates | Where-Object { $_ -match "x64" } | Select-Object -First 1)
-if (-not $chosen) { $chosen = $candidates | Select-Object -First 1 }
-
-$downloadUrl = "https://github.com$chosen"
-$zipPath = Join-Path $runtimeRedis "redis.zip"
-
-Write-Host "Downloading $downloadUrl"
-Invoke-WebRequest -Uri $downloadUrl -OutFile $zipPath -MaximumRedirection 10
-
-Write-Host "Extracting $zipPath"
-Expand-Archive -Path $zipPath -DestinationPath $runtimeRedis -Force
-Remove-Item $zipPath -Force
-
-if (-not (Test-Path $redisServerExe)) {
-  throw "Download finished, but redis-server.exe not found in $runtimeRedis"
-}
-
-Write-Host "OK: Redis extracted to $runtimeRedis"
-
+Write-Host "OK: Redis image is ready ($Image)"
+Write-Host "Data directory: $runtimeRedisData"
